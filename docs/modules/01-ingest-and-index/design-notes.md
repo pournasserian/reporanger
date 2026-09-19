@@ -134,6 +134,9 @@ Terse outputs, provenance and `_meta` on every response. Every list tool accepts
 
 ## Sensitivity policy
 
+> [!NOTE]
+> Superseded by the [sensitivity rules](../../specs/sensitivity-rules.md).
+
 - **File-name rules:** `.env*`, key and certificate files, credential stores, and configurable globs.
 - **Secret-pattern rules:** known credential formats (API keys, tokens, private keys), in the style of Secretlint or gitleaks.
 - Matching files are indexed for structure (so the graph stays complete) but their content never appears in `get_symbol`, `search`, `pack_context`, or `get_history` diffs; a redaction note appears instead.

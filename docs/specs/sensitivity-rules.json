@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "title": "RepoRanger sensitivity rules: model and defaults",
+  "description": "The JSON Schema for sensitivity rules ($defs), the redaction marker, and the default rule set (defaults), which conforms to $defs/rule_set. sensitivity-rules.md explains how rules match and what they do. Patterns use the portable regex subset described there.",
+
+  "marker": "[REDACTED:{rule_id}]",
+
+  "$defs": {
+    "rule_id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+
+    "file_rule": {
+      "type": "object",
+      "description": "Withholds every file whose path matches one of globs and none of exclude.",
+      "properties": {
+        "id": { "$ref": "#/$defs/rule_id" },
+        "description": { "type": "string", "minLength": 1 },
+        "globs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "exclude": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "required": ["id", "description", "globs"],
+      "additionalProperties": false
+    },
+
+    "pattern_rule": {
+      "type": "object",
+      "description": "Redacts the secret_group of every match that the allowlist and min_entropy let through.",
+      "properties": {
+        "id": { "$ref": "#/$defs/rule_id" },
+        "description": { "type": "string", "minLength": 1 },
+        "pattern": { "type": "string", "minLength": 1 },
+        "secret_group": { "type": "integer", "minimum": 0, "description": "0 redacts the whole match." },
+        "case_insensitive": { "type": "boolean" },
+        "keywords": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1, "pattern": "^[^A-Z]+$" },
+          "description": "Lowercase. Every match contains at least one of them, ignoring case, so a text without any can skip the rule."
+        },
+        "min_entropy": { "type": "number", "exclusiveMinimum": 0, "maximum": 8, "description": "Minimum Shannon entropy of the secret, in bits per character." }
+      },
+      "required": ["id", "description", "pattern", "secret_group", "case_insensitive", "keywords"],
+      "additionalProperties": false
+    },
+
+    "allowlist": {
+      "type": "object",
+      "properties": {
+        "values": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Patterns, matched ignoring case against a secret's value; a value any of them finds is not redacted."
+        },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Globs; matching files are exempt from every rule."
+        },
+        "repeated_character": { "type": "boolean", "description": "A value made of one character repeated is not redacted." }
+      },
+      "additionalProperties": false
+    },
+
+    "rule_set": {
+      "type": "object",
+      "properties": {
+        "rules_version": { "type": "integer", "minimum": 1 },
+        "file_rules": { "type": "array", "items": { "$ref": "#/$defs/file_rule" } },
+        "pattern_rules": { "type": "array", "items": { "$ref": "#/$defs/pattern_rule" } },
+        "allowlist": { "$ref": "#/$defs/allowlist" }
+      },
+      "required": ["rules_version", "file_rules", "pattern_rules", "allowlist"],
+      "additionalProperties": false
+    },
+
+    "user_rules": {
+      "type": "object",
+      "description": "What a repository's configuration adds to the defaults (M0 item 4b embeds this).",
+      "properties": {
+        "file_rules": { "type": "array", "items": { "$ref": "#/$defs/file_rule" } },
+        "pattern_rules": { "type": "array", "items": { "$ref": "#/$defs/pattern_rule" } },
+        "allowlist": {
+          "type": "object",
+          "properties": {
+            "values": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "paths": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        },
+        "disable": { "type": "array", "items": { "$ref": "#/$defs/rule_id" }, "uniqueItems": true, "description": "Ids of default rules to turn off." }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "defaults": {
+    "rules_version": 1,
+
+    "file_rules": [
+      {
+        "id": "dotenv",
+        "description": "Environment files; templates such as .env.example stay visible",
+        "globs": ["**/.env", "**/.env.*", "**/*.env", "**/.envrc"],
+        "exclude": ["**/*.example", "**/*.sample", "**/*.template", "**/*.dist"]
+      },
+      {
+        "id": "private-key-file",
+        "description": "Private keys and PEM files",
+        "globs": ["**/*.pem", "**/*.key", "**/*.p8", "**/*.ppk", "**/id_rsa", "**/id_dsa", "**/id_ecdsa", "**/id_ed25519"]
+      },
+      {
+        "id": "keystore",
+        "description": "Key stores and password databases",
+        "globs": ["**/*.p12", "**/*.pfx", "**/*.jks", "**/*.keystore", "**/*.kdbx", "**/*.keychain"]
+      },
+      {
+        "id": "credentials-file",
+        "description": "Credential files of common tools",
+        "globs": ["**/.netrc", "**/_netrc", "**/.git-credentials", "**/.pypirc", "**/.aws/credentials", "**/.docker/config.json", "**/.htpasswd"]
+      },
+      {
+        "id": "terraform-state",
+        "description": "Terraform state, which holds resource secrets in plain text",
+        "globs": ["**/*.tfstate", "**/*.tfstate.backup"]
+      },
+      {
+        "id": "kubeconfig",
+        "description": "Kubernetes client configuration with tokens and client keys",
+        "globs": ["**/.kube/config", "**/kubeconfig"]
+      },
+      {
+        "id": "secrets-file",
+        "description": "Files named as secret stores",
+        "globs": ["**/secrets.json", "**/secrets.yml", "**/secrets.yaml", "**/*.secrets"]
+      },
+      {
+        "id": "vpn-config",
+        "description": "VPN profiles with embedded keys",
+        "globs": ["**/*.ovpn"]
+      }
+    ],
+
+    "pattern_rules": [
+      {
+        "id": "private-key",
+        "description": "PEM, OpenSSH, and PGP private key blocks, also inside JSON strings",
+        "pattern": "-----BEGIN[ A-Z0-9_-]{0,100}PRIVATE KEY(?: BLOCK)?-----[A-Za-z0-9+/=\\s\\\\:,.]{64,8192}?-----END[ A-Z0-9_-]{0,100}PRIVATE KEY(?: BLOCK)?-----",
+        "secret_group": 0,
+        "case_insensitive": false,
+        "keywords": ["private key"]
+      },
+      {
+        "id": "aws-access-key-id",
+        "description": "AWS access key IDs",
+        "pattern": "\\b((?:AKIA|ASIA|ABIA|ACCA)[A-Z0-9]{16})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["akia", "asia", "abia", "acca"]
+      },
+      {
+        "id": "aws-secret-access-key",
+        "description": "AWS secret access keys assigned near an AWS secret name",
+        "pattern": "aws[a-z0-9_ .-]{0,20}secret[a-z0-9_ .-]{0,20}[\"']?[ \\t]*[:=>]{1,2}[ \\t]*[\"']?([a-z0-9/+=]{40})(?:[\"'\\s,;]|$)",
+        "secret_group": 1,
+        "case_insensitive": true,
+        "keywords": ["aws"]
+      },
+      {
+        "id": "github-token",
+        "description": "GitHub personal access, OAuth, user-to-server, server-to-server, and refresh tokens",
+        "pattern": "\\b((?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,255})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["ghp_", "gho_", "ghu_", "ghs_", "ghr_"]
+      },
+      {
+        "id": "github-fine-grained-token",
+        "description": "GitHub fine-grained personal access tokens",
+        "pattern": "\\b(github_pat_[A-Za-z0-9_]{82})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["github_pat_"]
+      },
+      {
+        "id": "gitlab-token",
+        "description": "GitLab personal, project, and group access tokens",
+        "pattern": "\\b(glpat-[A-Za-z0-9_-]{20,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["glpat-"]
+      },
+      {
+        "id": "slack-token",
+        "description": "Slack bot, app, user, refresh, and legacy tokens",
+        "pattern": "\\b(xox[abprs]-[A-Za-z0-9-]{10,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["xoxa-", "xoxb-", "xoxp-", "xoxr-", "xoxs-"]
+      },
+      {
+        "id": "slack-webhook",
+        "description": "Slack incoming webhook URLs",
+        "pattern": "(https://hooks\\.slack\\.com/services/[A-Za-z0-9_/+-]{20,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["hooks.slack.com"]
+      },
+      {
+        "id": "stripe-key",
+        "description": "Stripe secret and restricted keys",
+        "pattern": "\\b((?:sk|rk)_(?:live|test)_[A-Za-z0-9]{24,})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["sk_live_", "sk_test_", "rk_live_", "rk_test_"]
+      },
+      {
+        "id": "google-api-key",
+        "description": "Google API keys",
+        "pattern": "\\b(AIza[A-Za-z0-9_-]{35})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["aiza"]
+      },
+      {
+        "id": "openai-api-key",
+        "description": "OpenAI project, service-account, admin, and legacy API keys",
+        "pattern": "\\b(sk-(?:proj|svcacct|admin)-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["sk-proj-", "sk-svcacct-", "sk-admin-", "t3blbkfj"]
+      },
+      {
+        "id": "anthropic-api-key",
+        "description": "Anthropic API and admin keys",
+        "pattern": "\\b(sk-ant-(?:api|admin)[0-9]{2}-[A-Za-z0-9_-]{20,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["sk-ant-"]
+      },
+      {
+        "id": "npm-token",
+        "description": "npm access tokens",
+        "pattern": "\\b(npm_[A-Za-z0-9]{36})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["npm_"]
+      },
+      {
+        "id": "pypi-token",
+        "description": "PyPI API tokens",
+        "pattern": "\\b(pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["pypi-ageichlwas5vcmc"]
+      },
+      {
+        "id": "nuget-api-key",
+        "description": "NuGet.org API keys",
+        "pattern": "\\b(oy2[a-z0-9]{43})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["oy2"]
+      },
+      {
+        "id": "sendgrid-api-key",
+        "description": "SendGrid API keys",
+        "pattern": "\\b(SG\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]{43})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["sg."]
+      },
+      {
+        "id": "azure-storage-account-key",
+        "description": "Azure storage account keys in connection strings",
+        "pattern": "AccountKey=([a-z0-9+/]{86}==)",
+        "secret_group": 1,
+        "case_insensitive": true,
+        "keywords": ["accountkey="]
+      },
+      {
+        "id": "azure-sas-signature",
+        "description": "Signatures of Azure shared access signature URLs",
+        "pattern": "[?&]sig=([A-Za-z0-9%+/=]{40,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["sig="]
+      },
+      {
+        "id": "digitalocean-token",
+        "description": "DigitalOcean personal, OAuth, and refresh tokens",
+        "pattern": "\\b(do[opr]_v1_[a-f0-9]{64})\\b",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["dop_v1_", "doo_v1_", "dor_v1_"]
+      },
+      {
+        "id": "vault-token",
+        "description": "HashiCorp Vault service tokens",
+        "pattern": "\\b(hvs\\.[A-Za-z0-9_-]{24,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["hvs."]
+      },
+      {
+        "id": "docker-hub-token",
+        "description": "Docker Hub personal access tokens",
+        "pattern": "\\b(dckr_pat_[A-Za-z0-9_-]{27,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["dckr_pat_"]
+      },
+      {
+        "id": "age-secret-key",
+        "description": "age encryption secret keys",
+        "pattern": "(AGE-SECRET-KEY-1[0-9A-Z]{58})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["age-secret-key-1"]
+      },
+      {
+        "id": "jwt",
+        "description": "JSON Web Tokens",
+        "pattern": "\\b(eyJ[A-Za-z0-9_-]{10,}\\.eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,})",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["eyj"]
+      },
+      {
+        "id": "url-credentials",
+        "description": "Passwords embedded in URLs (scheme://user:password@host)",
+        "pattern": "\\b[A-Za-z][A-Za-z0-9+.-]{1,20}://[^/\\s:@\"']{1,100}:([^/\\s:@\"']{3,100})@",
+        "secret_group": 1,
+        "case_insensitive": false,
+        "keywords": ["://"]
+      },
+      {
+        "id": "connection-string-password",
+        "description": "Unquoted passwords in connection strings and key=value settings",
+        "pattern": "(?:password|pwd)=([^;\"'\\s()\\[\\]{}=]{4,128}={0,2})(?:[;\"'\\s,]|$)",
+        "secret_group": 1,
+        "case_insensitive": true,
+        "keywords": ["password", "pwd"],
+        "min_entropy": 3.0
+      },
+      {
+        "id": "generic-secret-assignment",
+        "description": "Quoted values assigned to names that suggest a password, secret, token, or key",
+        "pattern": "(?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|auth[_-]?token|private[_-]?key)[a-z0-9_-]{0,20}[\"']?[ \\t]*[:=>]{1,2}[ \\t]*[\"']([^\"'\\s:]{8,})[\"']",
+        "secret_group": 1,
+        "case_insensitive": true,
+        "keywords": ["password", "passwd", "pwd", "secret", "token", "key"],
+        "min_entropy": 3.0
+      }
+    ],
+
+    "allowlist": {
+      "repeated_character": true,
+      "values": [
+        "example|sample|dummy|placeholder|changeme|change_me|redacted|your[_-]|insert[_-]|replace[_-]?me",
+        "^(?:\\$\\{|\\{\\{|\\$\\(|%\\()",
+        "^<[^>]*>$",
+        "^[x*#._-]+$",
+        "^(?:password|passwd|pass|secret|token|apikey|api_key|test|none|null|undefined)$",
+        "^[a-z]+(?:[_-][a-z]+)*$"
+      ],
+      "paths": []
+    }
+  }
+}
