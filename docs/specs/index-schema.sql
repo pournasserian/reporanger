@@ -142,7 +142,8 @@
 -- The version goes up with any change to this file that alters the DDL or the meaning of a
 -- stored value: the ID scheme, the hash algorithm, a vocabulary, an attribute key or its unit,
 -- or the chunk size. A reader that finds any other version, older or newer, re-indexes. P0
--- has no migrations.
+-- has no migrations. While this file is Proposed, nothing has been built against it, so
+-- changes keep version 1; counting starts when the file is Accepted.
 
 
 -- 5. Index hash -------------------------------------------------------------------------------
@@ -214,6 +215,11 @@
 --
 --   Commit per batch. meta.state stays 'building' until the last batch. The final transaction
 --   sets index_hash, state = 'ready', and updated_at together.
+--
+--   An automatic refresh (mcp-meta.json, freshness; M0 item 2) is not a run. In one
+--   transaction it updates the refreshed files' rows (extraction 'syntax' for files that had
+--   SCIP resolution), their facts_hash, meta.index_hash, and meta.dirty. It leaves updated_at
+--   alone, so index age keeps counting from the last completed run.
 --
 --   Redact every free-text column before writing it (section 2).
 --
@@ -290,6 +296,17 @@ CREATE TABLE extractors (
 --   symbol     a declaration in the repository, or an external symbol it references
 --   package    a dependency from a manifest or lockfile
 --   community  a module found by community detection over the files
+--
+-- A file's extraction status says how its facts were obtained:
+--   scip      the syntax pass and SCIP resolution, both for the file's current content
+--   fallback  the syntax pass and fallback resolution only: the project doesn't build, or its
+--             SCIP index has no document for the file
+--   syntax    an automatic refresh re-ran the syntax pass on new content, so symbols, spans,
+--             metrics, and stored text are current, but SCIP hasn't re-resolved the file yet:
+--             its outgoing reference edges still come from the last SCIP run and are reported
+--             as pending until index_repo resolves them (mcp-meta.json, freshness; M0 item 2)
+--   text      a file that isn't code: inventory and full-text only
+--   skipped   not extracted; skip_reason says why
 CREATE TABLE nodes (
   node_key       INTEGER PRIMARY KEY,      -- internal: never returned by tools, never hashed
   id             TEXT    NOT NULL UNIQUE,  -- section 3
@@ -324,7 +341,7 @@ CREATE TABLE nodes (
                            -- Not unique: scip-dotnet can emit the same string in two projects.
   is_external    INTEGER NOT NULL DEFAULT 0 CHECK (is_external IN (0, 1)),
   is_test        INTEGER NOT NULL DEFAULT 0 CHECK (is_test IN (0, 1)),  -- test file or symbol
-  extraction     TEXT    CHECK (extraction IN ('scip', 'fallback', 'text', 'skipped')),
+  extraction     TEXT    CHECK (extraction IN ('scip', 'fallback', 'syntax', 'text', 'skipped')),
   skip_reason    TEXT    CHECK (skip_reason IN (
                    'generated', 'vendored', 'minified', 'binary', 'too_large', 'excluded',
                    'encoding')),
@@ -452,7 +469,8 @@ CREATE INDEX nodes_by_scip_symbol ON nodes (scip_symbol) WHERE scip_symbol IS NO
 --
 -- A call site is CALLS and never also REFERENCES. The syntax pass tells calls from other
 -- references (ADR 0013). IMPLEMENTS also covers a member that implements or overrides
--- another, because SCIP doesn't tell the two apart.
+-- another, because SCIP doesn't tell the two apart. Edges whose file_key is a file with
+-- extraction 'syntax' reflect that file as SCIP last saw it; tools report them as pending.
 --
 -- Edge attrs:
 --   DEPENDS_ON  {"declared": the version range as written,
@@ -618,8 +636,8 @@ CREATE TABLE tags (
 
 
 -- diagnostics: what extraction missed or degraded, for the health report. The health report
--- is a query over these rows, over file nodes by extraction and skip_reason, and over project
--- nodes by attrs.extraction. There is one row per (node, code, line). line is NULL for a count
+-- is a query over these rows, over file nodes by extraction and skip_reason (files with
+-- extraction 'syntax' are pending re-resolution), and over project nodes by attrs.extraction. There is one row per (node, code, line). line is NULL for a count
 -- that covers the whole node.
 --   parse_error            file     the syntax pass found syntax errors
 --   indexer_failed         project  the SCIP indexer ran and failed; the project is on the fallback

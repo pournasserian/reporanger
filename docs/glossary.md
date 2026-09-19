@@ -18,7 +18,7 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Decayed churn | Churn weighted by recency, so old changes count less than recent ones; the churn factor in the hotspot score. |
 | Deep analyzer | A language-native plugin for facts SCIP doesn't carry, such as DI registrations, endpoints, and ORM entities. P1 inventories first; analyzers only where P1 shows a need. |
 | External symbol | A symbol defined outside the repository, such as a .NET base-library type or a member of a NuGet, npm, or PyPI package. The index stores the ones the code references, so their uses can be queried. |
-| Extraction status | How fully a file was extracted: `scip`, `fallback`, `text` (inventory and full-text only), or `skipped` with a reason. |
+| Extraction status | How fully a file was extracted: `scip`, `fallback`, `syntax` (refreshed after an edit, with SCIP re-resolution pending), `text` (inventory and full-text only), or `skipped` with a reason. |
 | Extractor plugin | The interface for adding support for a language or framework. |
 | Fact base | Everything RepoRanger knows about a repository (code graph, history, artifacts, metrics), with provenance. Lenses query it instead of reading raw files. |
 | Fallback extraction | Tree-sitter symbols and imports, without call resolution, for projects a SCIP indexer can't build; the syntax pass is its only source. Its import edges are `import-scoped` or `name-match`. |
