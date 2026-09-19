@@ -55,6 +55,9 @@ List tools return up to limit items, and next_cursor when there are more; pass i
 Freshness
 Every result carries _meta: indexed_commit, index_age in seconds, stale, schema_version, state, dirty, refreshed, pending, and changed. Before answering, the server refreshes up to 20 changed files within 2 seconds. A refreshed file has current symbols and text, but its outgoing edges keep the last full resolution until index_repo runs: pending counts such files, and their edges carry pending. When stale is true, more has changed than a refresh covers. Run index_repo, which works in the background, and follow its progress with get_index_info.
 
+Secrets
+Text passes through sensitivity rules before you see it. [REDACTED:<rule id>] marks a secret, such as an API key or a password. No RepoRanger tool returns its value; if a task needs the actual value, ask the user. Files like .env and private keys are withheld: they're in the graph, but their text never appears.
+
 Search
 search returns two lists. symbols matches words in names, qualified names, signatures, and doc comments, and splits camelCase and snake_case, so user finds GetUserById. text matches any substring of three or more characters, ignoring case, and returns the matching line with context. Narrow with path, languages, kinds, and is_test.
 ```

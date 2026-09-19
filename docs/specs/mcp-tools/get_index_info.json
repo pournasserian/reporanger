@@ -99,9 +99,26 @@
             }
           },
           "pending_files": { "type": "integer", "minimum": 0 },
-          "unresolved_references": { "type": "integer", "minimum": 0 }
+          "unresolved_references": { "type": "integer", "minimum": 0 },
+          "sensitivity": {
+            "type": "object",
+            "description": "What the sensitivity rules did (sensitivity-rules.md, section 9).",
+            "properties": {
+              "rules_version": { "type": "integer", "minimum": 1 },
+              "withheld_files": { "type": "integer", "minimum": 0 },
+              "redacted_files": { "type": "integer", "minimum": 0 },
+              "redactions": {
+                "type": "object",
+                "description": "Redactions in stored text, by rule id.",
+                "additionalProperties": { "type": "integer", "minimum": 1 }
+              },
+              "disabled_rules": { "type": "array", "items": { "type": "string" }, "description": "Default rules the configuration turns off." }
+            },
+            "required": ["rules_version", "withheld_files", "redacted_files", "redactions", "disabled_rules"],
+            "additionalProperties": false
+          }
         },
-        "required": ["skipped", "diagnostics", "fallback_projects", "pending_files", "unresolved_references"],
+        "required": ["skipped", "diagnostics", "fallback_projects", "pending_files", "unresolved_references", "sensitivity"],
         "additionalProperties": false
       },
       "run": { "$ref": "../mcp-meta.json#/$defs/run" },

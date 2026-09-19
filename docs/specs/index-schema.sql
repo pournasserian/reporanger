@@ -41,8 +41,8 @@
 -- Redaction     Every free-text column (chunks.text, nodes.signature, nodes.doc,
 --               commits.message, diagnostics.message) passes through the sensitivity rules
 --               before it is written, so the file never holds a matched secret. Redaction
---               never adds or removes a line break. The rules and the redaction marker belong
---               to sensitivity-rules.md (M0, to come).
+--               never adds or removes a line break. The rules, the redaction marker, and
+--               what a withheld file keeps are defined in sensitivity-rules.md.
 -- Provenance    Every node and edge names the extractor that produced it. Through file_key it
 --               also names the file it came from, and line ranges and sites give the lines.
 --               The commit of every fact is meta.indexed_commit. A file whose indexed content
@@ -335,8 +335,10 @@ CREATE TABLE nodes (
   content_hash   TEXT,     -- file: git blob ID of its content as git would store it
                            -- (git hash-object --path; of the raw bytes when there is no git).
                            -- symbol: SHA-256 of its span's text with LF line endings.
-  signature      TEXT,     -- symbol: its declaration without the body, whitespace collapsed
-  doc            TEXT,     -- symbol: its doc comment or docstring, comment markers removed
+  signature      TEXT,     -- symbol: its declaration without the body, whitespace collapsed;
+                           -- NULL in a withheld file
+  doc            TEXT,     -- symbol: its doc comment or docstring, comment markers removed;
+                           -- NULL in a withheld file
   scip_symbol    TEXT,     -- symbol: the SCIP symbol string, when SCIP defines or names it.
                            -- Not unique: scip-dotnet can emit the same string in two projects.
   is_external    INTEGER NOT NULL DEFAULT 0 CHECK (is_external IN (0, 1)),
@@ -406,6 +408,8 @@ CREATE INDEX nodes_by_scip_symbol ON nodes (scip_symbol) WHERE scip_symbol IS NO
 --              loc              integer        row      lines that aren't blank or only comments
 --                                                       (code files)
 --              bytes            integer        row      size of the content as hashed
+--              redactions       object         row      redactions by rule id, never the values
+--                                                       (sensitivity-rules.md)
 --              entry_point      text           signals  main or package_entry (M2)
 --              commits          integer        signals  non-merge commits that touched the file
 --              churn            real           signals  recency-weighted commits (M3)
