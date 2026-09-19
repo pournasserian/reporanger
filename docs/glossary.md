@@ -44,6 +44,7 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Profile | A storage deployment shape: Embedded (a single file for a laptop, CI, or MCP) or Server (multi-user, for teams). |
 | Provenance | Where a fact came from: file, line range, commit, and the extractor that produced it. Within an index, the commit is the indexed commit. |
 | Redaction | Replacing a secret in stored text or in a response with `[REDACTED:<rule id>]`. Every line break is kept, so line numbers never move. See the [sensitivity rules](specs/sensitivity-rules.md). |
+| Registry | The user's list of registered repositories and the settings that name executables, in `registry.toml` under the RepoRanger home. See [configuration](specs/config.md). |
 | Renderer | Turns findings and summaries into outputs: documents, llms.txt or AGENTS.md files, and backlog items. |
 | Resolution level | How an edge's target was identified: `resolved` exactly (by a compiler through SCIP, or by a structural fact such as containment, a manifest, or git history), `import-scoped` (unique within imported files), or `name-match` (a repo-wide guess). The weight, not the level, says how strong the link is. See [ADR 0012](decisions/0012-resolution-levels-for-every-edge.md). |
 | Response budget | The most an MCP response may hold: 8,000 estimated tokens, counted as UTF-8 bytes ÷ 4. A longer answer is cut, marked `truncated`, and continued with a cursor. |

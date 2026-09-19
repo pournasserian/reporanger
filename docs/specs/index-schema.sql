@@ -258,7 +258,8 @@ CREATE TABLE meta (
   history             TEXT    NOT NULL CHECK (history IN ('full', 'window', 'shallow', 'none')),
   pseudonymized       INTEGER NOT NULL CHECK (pseudonymized IN (0, 1)),
   config_json         TEXT    NOT NULL,  -- the effective configuration that shapes the content,
-                                         -- as RFC 8785 JSON; no secrets, no machine paths
+                                         -- as RFC 8785 JSON; no secrets, no machine paths.
+                                         -- Its shape is effective_config in config.schema.json
   config_hash         TEXT    NOT NULL,  -- SHA-256 of config_json
   tool_version        TEXT    NOT NULL,  -- the implementation that wrote the index, and its version
   created_at          INTEGER NOT NULL,
