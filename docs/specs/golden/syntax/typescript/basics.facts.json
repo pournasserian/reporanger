@@ -1,0 +1,684 @@
+{
+  "path": "basics.ts",
+  "declarations": [
+    {
+      "kind": "class",
+      "name": "Product",
+      "qualified_name": "Product",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        5,
+        0,
+        30,
+        1
+      ],
+      "name_range": [
+        6,
+        13,
+        6,
+        20
+      ],
+      "signature": "export class Product",
+      "doc": "A product in the catalogue.",
+      "visibility": "public",
+      "modifiers": [
+        "export"
+      ],
+      "metrics": {
+        "loc": 21
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "kind",
+      "qualified_name": "Product.kind",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        7,
+        2,
+        7,
+        35
+      ],
+      "name_range": [
+        7,
+        18,
+        7,
+        22
+      ],
+      "signature": "static readonly kind",
+      "visibility": "public",
+      "modifiers": [
+        "static",
+        "readonly"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "#secret",
+      "qualified_name": "Product.#secret",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        8,
+        2,
+        8,
+        15
+      ],
+      "name_range": [
+        8,
+        2,
+        8,
+        9
+      ],
+      "signature": "#secret",
+      "visibility": "private",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "price",
+      "qualified_name": "Product.price",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        9,
+        2,
+        9,
+        20
+      ],
+      "name_range": [
+        9,
+        10,
+        9,
+        15
+      ],
+      "signature": "private price",
+      "visibility": "private",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "constructor",
+      "name": "constructor",
+      "qualified_name": "Product.constructor",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        11,
+        2,
+        11,
+        46
+      ],
+      "name_range": [
+        11,
+        2,
+        11,
+        13
+      ],
+      "signature": "constructor(public readonly name: string)",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "name",
+      "qualified_name": "Product.name",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        11,
+        14,
+        11,
+        42
+      ],
+      "name_range": [
+        11,
+        30,
+        11,
+        34
+      ],
+      "signature": "public readonly name: string",
+      "visibility": "public",
+      "modifiers": [
+        "readonly"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "label",
+      "qualified_name": "Product.label",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        13,
+        2,
+        15,
+        3
+      ],
+      "name_range": [
+        13,
+        6,
+        13,
+        11
+      ],
+      "signature": "get label(): string",
+      "visibility": "public",
+      "modifiers": [
+        "get"
+      ],
+      "metrics": {
+        "loc": 3
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "label",
+      "qualified_name": "Product.label",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        16,
+        2,
+        18,
+        3
+      ],
+      "name_range": [
+        16,
+        6,
+        16,
+        11
+      ],
+      "signature": "set label(value: string)",
+      "visibility": "public",
+      "modifiers": [
+        "set"
+      ],
+      "metrics": {
+        "loc": 3
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "format",
+      "qualified_name": "Product.format",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        20,
+        2,
+        20,
+        32
+      ],
+      "name_range": [
+        20,
+        2,
+        20,
+        8
+      ],
+      "signature": "format(value: number): string",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": true,
+      "has_body": false
+    },
+    {
+      "kind": "method",
+      "name": "format",
+      "qualified_name": "Product.format",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        21,
+        2,
+        21,
+        32
+      ],
+      "name_range": [
+        21,
+        2,
+        21,
+        8
+      ],
+      "signature": "format(value: string): string",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": true,
+      "has_body": false
+    },
+    {
+      "kind": "method",
+      "name": "format",
+      "qualified_name": "Product.format",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        22,
+        2,
+        27,
+        3
+      ],
+      "name_range": [
+        22,
+        2,
+        22,
+        8
+      ],
+      "signature": "format(value: number | string): string",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 6,
+        "complexity": 3,
+        "nesting": 1,
+        "params": 1
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "toId",
+      "qualified_name": "Product.toId",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        29,
+        2,
+        29,
+        37
+      ],
+      "name_range": [
+        29,
+        11,
+        29,
+        15
+      ],
+      "signature": "readonly toId",
+      "visibility": "public",
+      "modifiers": [
+        "readonly"
+      ],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "interface",
+      "name": "Product",
+      "qualified_name": "Product",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        32,
+        0,
+        34,
+        1
+      ],
+      "name_range": [
+        32,
+        17,
+        32,
+        24
+      ],
+      "signature": "export interface Product",
+      "visibility": "public",
+      "modifiers": [
+        "export"
+      ],
+      "metrics": {
+        "loc": 3
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "sku",
+      "qualified_name": "Product.sku",
+      "overload_identity": null,
+      "parent": 12,
+      "span": [
+        33,
+        2,
+        33,
+        15
+      ],
+      "name_range": [
+        33,
+        2,
+        33,
+        5
+      ],
+      "signature": "sku?: string",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "function",
+      "name": "makeProduct",
+      "qualified_name": "makeProduct",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        36,
+        0,
+        36,
+        69
+      ],
+      "name_range": [
+        36,
+        13,
+        36,
+        24
+      ],
+      "signature": "export const makeProduct = async (name: string)",
+      "visibility": "public",
+      "modifiers": [
+        "export",
+        "async"
+      ],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "function",
+      "name": "default",
+      "qualified_name": "default",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        38,
+        0,
+        38,
+        29
+      ],
+      "name_range": [
+        38,
+        15,
+        38,
+        23
+      ],
+      "signature": "export default function ()",
+      "visibility": "public",
+      "modifiers": [
+        "export",
+        "default"
+      ],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum",
+      "name": "Status",
+      "qualified_name": "Status",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        40,
+        0,
+        43,
+        1
+      ],
+      "name_range": [
+        40,
+        12,
+        40,
+        18
+      ],
+      "signature": "export enum Status",
+      "visibility": "public",
+      "modifiers": [
+        "export"
+      ],
+      "metrics": {
+        "loc": 4
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum_member",
+      "name": "Draft",
+      "qualified_name": "Status.Draft",
+      "overload_identity": null,
+      "parent": 16,
+      "span": [
+        41,
+        2,
+        41,
+        18
+      ],
+      "name_range": [
+        41,
+        2,
+        41,
+        7
+      ],
+      "signature": "Draft = \"draft\"",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum_member",
+      "name": "Live",
+      "qualified_name": "Status.Live",
+      "overload_identity": null,
+      "parent": 16,
+      "span": [
+        42,
+        2,
+        42,
+        16
+      ],
+      "name_range": [
+        42,
+        2,
+        42,
+        6
+      ],
+      "signature": "Live = \"live\"",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "type_alias",
+      "name": "ProductId",
+      "qualified_name": "ProductId",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        45,
+        0,
+        45,
+        31
+      ],
+      "name_range": [
+        45,
+        12,
+        45,
+        21
+      ],
+      "signature": "export type ProductId = string",
+      "visibility": "public",
+      "modifiers": [
+        "export"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "class",
+      "name": "Cart",
+      "qualified_name": "Legacy.Cart",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        48,
+        2,
+        48,
+        22
+      ],
+      "name_range": [
+        48,
+        15,
+        48,
+        19
+      ],
+      "signature": "export class Cart",
+      "visibility": "public",
+      "modifiers": [
+        "export"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    }
+  ],
+  "call_sites": [
+    [
+      26,
+      11,
+      26,
+      17
+    ],
+    [
+      29,
+      24,
+      29,
+      34
+    ],
+    [
+      36,
+      55,
+      36,
+      62
+    ]
+  ],
+  "imports": [
+    {
+      "module": "./repository",
+      "names": [
+        "Repository"
+      ],
+      "kind": "relative",
+      "line": 2
+    },
+    {
+      "module": "node:crypto",
+      "names": [
+        "randomUUID"
+      ],
+      "kind": "absolute",
+      "line": 3
+    }
+  ],
+  "lines": 49,
+  "loc": 36,
+  "test": false,
+  "errors": []
+}

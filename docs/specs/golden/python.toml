@@ -1,0 +1,23 @@
+# Status: Proposed · Last updated: 2026-09-19
+# The Python accuracy oracle. Shape: golden.schema.json, golden_sample.
+# Both edge lists are filled by task M3-06.
+
+version = 1
+language = "python"
+
+[fixture]
+path = "fixture/python"
+min_precision = 0.90
+min_recall = 0.90
+filled_by = "M3-06"
+edges = []
+absent = []
+
+[demo]
+repo = "fastapi/fastapi"
+commit = ""
+sample_seed = 20260919
+sample_size = 30
+min_precision = 0.90
+filled_by = "M3-06"
+edges = []

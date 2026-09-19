@@ -1,0 +1,738 @@
+{
+  "path": "basics.cs",
+  "declarations": [
+    {
+      "kind": "class",
+      "name": "Order",
+      "qualified_name": "Shop.Core.Order",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        7,
+        0,
+        48,
+        1
+      ],
+      "name_range": [
+        8,
+        21,
+        8,
+        26
+      ],
+      "signature": "public partial class Order : IPrintable",
+      "doc": "<summary>An order.</summary>",
+      "visibility": "public",
+      "modifiers": [
+        "partial"
+      ],
+      "metrics": {
+        "loc": 33
+      },
+      "test": false,
+      "merge": true,
+      "has_body": true
+    },
+    {
+      "kind": "constant",
+      "name": "MaxItems",
+      "qualified_name": "Shop.Core.Order.MaxItems",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        10,
+        4,
+        10,
+        35
+      ],
+      "name_range": [
+        10,
+        21,
+        10,
+        29
+      ],
+      "signature": "public const int MaxItems",
+      "visibility": "public",
+      "modifiers": [
+        "const"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "field",
+      "name": "_items",
+      "qualified_name": "Shop.Core.Order._items",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        11,
+        4,
+        11,
+        62
+      ],
+      "name_range": [
+        11,
+        34,
+        11,
+        40
+      ],
+      "signature": "private readonly List<string> _items",
+      "visibility": "private",
+      "modifiers": [
+        "readonly"
+      ],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "event",
+      "name": "Changed",
+      "qualified_name": "Shop.Core.Order.Changed",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        12,
+        4,
+        12,
+        38
+      ],
+      "name_range": [
+        12,
+        30,
+        12,
+        37
+      ],
+      "signature": "public event EventHandler Changed",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "Id",
+      "qualified_name": "Shop.Core.Order.Id",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        13,
+        4,
+        13,
+        41
+      ],
+      "name_range": [
+        13,
+        18,
+        13,
+        20
+      ],
+      "signature": "public string Id",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "indexer",
+      "name": "this[]",
+      "qualified_name": "Shop.Core.Order.this[]",
+      "overload_identity": "(int)",
+      "parent": 0,
+      "span": [
+        14,
+        4,
+        14,
+        51
+      ],
+      "name_range": [
+        14,
+        18,
+        14,
+        22
+      ],
+      "signature": "public string this[int index]",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "constructor",
+      "name": "<ctor>",
+      "qualified_name": "Shop.Core.Order.<ctor>",
+      "overload_identity": "()",
+      "parent": 0,
+      "span": [
+        16,
+        4,
+        16,
+        22
+      ],
+      "name_range": [
+        16,
+        11,
+        16,
+        16
+      ],
+      "signature": "public Order()",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "constructor",
+      "name": "<cctor>",
+      "qualified_name": "Shop.Core.Order.<cctor>",
+      "overload_identity": "()",
+      "parent": 0,
+      "span": [
+        17,
+        4,
+        17,
+        22
+      ],
+      "name_range": [
+        17,
+        11,
+        17,
+        16
+      ],
+      "signature": "static Order()",
+      "visibility": "private",
+      "modifiers": [
+        "static"
+      ],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "finalizer",
+      "name": "<finalizer>",
+      "qualified_name": "Shop.Core.Order.<finalizer>",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        18,
+        4,
+        18,
+        16
+      ],
+      "name_range": [
+        18,
+        5,
+        18,
+        10
+      ],
+      "signature": "~Order()",
+      "visibility": "private",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "Add",
+      "qualified_name": "Shop.Core.Order.Add",
+      "overload_identity": "(string)",
+      "parent": 0,
+      "span": [
+        20,
+        4,
+        30,
+        5
+      ],
+      "name_range": [
+        21,
+        16,
+        21,
+        19
+      ],
+      "signature": "public bool Add(string item)",
+      "doc": "<summary>Adds an item.</summary>",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 10,
+        "complexity": 3,
+        "nesting": 1,
+        "params": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "Add",
+      "qualified_name": "Shop.Core.Order.Add",
+      "overload_identity": "(string,int)",
+      "parent": 0,
+      "span": [
+        32,
+        4,
+        39,
+        5
+      ],
+      "name_range": [
+        32,
+        16,
+        32,
+        19
+      ],
+      "signature": "public bool Add(string item, int quantity)",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 8,
+        "complexity": 2,
+        "nesting": 1,
+        "params": 2
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "Get",
+      "qualified_name": "Shop.Core.Order.Get",
+      "overload_identity": "`1(int)",
+      "parent": 0,
+      "span": [
+        41,
+        4,
+        41,
+        59
+      ],
+      "name_range": [
+        41,
+        13,
+        41,
+        16
+      ],
+      "signature": "public T Get<T>(int index)",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "operator",
+      "name": "op_Explicit",
+      "qualified_name": "Shop.Core.Order.op_Explicit",
+      "overload_identity": "(Order)->string",
+      "parent": 0,
+      "span": [
+        43,
+        4,
+        43,
+        68
+      ],
+      "name_range": [
+        43,
+        27,
+        43,
+        35
+      ],
+      "signature": "public static explicit operator string(Order order)",
+      "visibility": "public",
+      "modifiers": [
+        "static"
+      ],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "IPrintable.Print",
+      "qualified_name": "Shop.Core.Order.IPrintable.Print",
+      "overload_identity": "()",
+      "parent": 0,
+      "span": [
+        45,
+        4,
+        45,
+        53
+      ],
+      "name_range": [
+        45,
+        9,
+        45,
+        25
+      ],
+      "signature": "void IPrintable.Print()",
+      "visibility": "private",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum",
+      "name": "State",
+      "qualified_name": "Shop.Core.Order.State",
+      "overload_identity": null,
+      "parent": 0,
+      "span": [
+        47,
+        4,
+        47,
+        39
+      ],
+      "name_range": [
+        47,
+        16,
+        47,
+        21
+      ],
+      "signature": "public enum State",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum_member",
+      "name": "Draft",
+      "qualified_name": "Shop.Core.Order.State.Draft",
+      "overload_identity": null,
+      "parent": 14,
+      "span": [
+        47,
+        24,
+        47,
+        29
+      ],
+      "name_range": [
+        47,
+        24,
+        47,
+        29
+      ],
+      "signature": "Draft",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "enum_member",
+      "name": "Placed",
+      "qualified_name": "Shop.Core.Order.State.Placed",
+      "overload_identity": null,
+      "parent": 14,
+      "span": [
+        47,
+        31,
+        47,
+        37
+      ],
+      "name_range": [
+        47,
+        31,
+        47,
+        37
+      ],
+      "signature": "Placed",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "interface",
+      "name": "IPrintable",
+      "qualified_name": "Shop.Core.IPrintable",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        50,
+        0,
+        50,
+        45
+      ],
+      "name_range": [
+        50,
+        17,
+        50,
+        27
+      ],
+      "signature": "public interface IPrintable",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "method",
+      "name": "Print",
+      "qualified_name": "Shop.Core.IPrintable.Print",
+      "overload_identity": "()",
+      "parent": 17,
+      "span": [
+        50,
+        30,
+        50,
+        43
+      ],
+      "name_range": [
+        50,
+        35,
+        50,
+        40
+      ],
+      "signature": "void Print()",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1,
+        "complexity": 1,
+        "nesting": 0,
+        "params": 0
+      },
+      "test": false,
+      "merge": false,
+      "has_body": false
+    },
+    {
+      "kind": "record",
+      "name": "Customer",
+      "qualified_name": "Shop.Core.Customer",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        52,
+        0,
+        52,
+        45
+      ],
+      "name_range": [
+        52,
+        14,
+        52,
+        22
+      ],
+      "signature": "public record Customer(string Name, int Age)",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "Name",
+      "qualified_name": "Shop.Core.Customer.Name",
+      "overload_identity": null,
+      "parent": 19,
+      "span": [
+        52,
+        23,
+        52,
+        34
+      ],
+      "name_range": [
+        52,
+        30,
+        52,
+        34
+      ],
+      "signature": "string Name",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "property",
+      "name": "Age",
+      "qualified_name": "Shop.Core.Customer.Age",
+      "overload_identity": null,
+      "parent": 19,
+      "span": [
+        52,
+        36,
+        52,
+        43
+      ],
+      "name_range": [
+        52,
+        40,
+        52,
+        43
+      ],
+      "signature": "int Age",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    },
+    {
+      "kind": "delegate",
+      "name": "Notify",
+      "qualified_name": "Shop.Core.Notify",
+      "overload_identity": null,
+      "parent": null,
+      "span": [
+        54,
+        0,
+        54,
+        41
+      ],
+      "name_range": [
+        54,
+        21,
+        54,
+        27
+      ],
+      "signature": "public delegate void Notify(Order order)",
+      "visibility": "public",
+      "modifiers": [],
+      "metrics": {
+        "loc": 1
+      },
+      "test": false,
+      "merge": false,
+      "has_body": true
+    }
+  ],
+  "call_sites": [
+    [
+      11,
+      47,
+      11,
+      51
+    ],
+    [
+      27,
+      15,
+      27,
+      18
+    ],
+    [
+      28,
+      16,
+      28,
+      22
+    ],
+    [
+      36,
+      12,
+      36,
+      15
+    ],
+    [
+      45,
+      39,
+      45,
+      48
+    ]
+  ],
+  "imports": [
+    {
+      "module": "System",
+      "names": [],
+      "kind": "namespace",
+      "line": 2
+    },
+    {
+      "module": "System.Collections.Generic",
+      "names": [],
+      "kind": "namespace",
+      "line": 3
+    }
+  ],
+  "lines": 54,
+  "loc": 39,
+  "test": false,
+  "errors": []
+}

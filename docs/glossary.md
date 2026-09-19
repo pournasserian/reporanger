@@ -13,6 +13,7 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Call site | The name of the callee in a call, as a syntax extractor reports it. A SCIP occurrence at a call site becomes a CALLS edge; any other occurrence becomes a REFERENCES edge. |
 | Change coupling | Files or modules that tend to change in the same commits, which can reveal dependencies the code graph doesn't show. |
 | Churn | How often a file or symbol changes over time. |
+| Conformance case | A source file beside its expected syntax facts, under `docs/specs/golden/syntax/`. An extractor conforms when it reproduces them exactly. See the [fixture design](specs/fixture/README.md). |
 | Community | A cluster of files and symbols found by community detection over the dependency graph, independent of folder layout. The docs also call it a module (code sense). |
 | Context packing | Building a token-budgeted bundle (a symbol, its neighbors, summaries, evidence) for one question instead of sending whole files or repositories to a model. |
 | Coupling degree | How strongly two files are change-coupled: 2 × shared commits ÷ (commits of one + commits of the other), from 0 to 1. |
@@ -24,7 +25,7 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Fact base | Everything RepoRanger knows about a repository (code graph, history, artifacts, metrics), with provenance. Lenses query it instead of reading raw files. |
 | Fallback extraction | Symbols and imports without call resolution, for projects a SCIP indexer can't build. They come from the language's syntax extractor alone, which uses tree-sitter by default ([ADR 0015](decisions/0015-any-parser-that-passes-the-fixtures.md)). Its import edges are `import-scoped` or `name-match`. |
 | Fixture | A small repository kept inside RepoRanger's own repository, with known symbol and edge counts and one project that deliberately doesn't build; the accuracy oracle and the fallback test. |
-| Golden sample | A hand-checked set of call edges (30 per language) used to measure extraction precision; enforced in CI. |
+| Golden sample | Per language, every code edge of its fixture project, checked by hand, plus a judged sample of 30 call edges from its demo repository. CI measures precision and recall against the fixture half; the demo half runs at release. See [`golden/`](specs/golden/csharp.toml). |
 | Finding | A structured, evidence-backed result with a location, evidence, severity, confidence, and category, in a SARIF-style schema. |
 | GraphRAG-lite | Community detection plus hierarchical summaries over the deterministic code graph, without LLM entity extraction. |
 | Health report | What extraction missed: parse failures, unresolved symbols, skipped files, and degraded analyzers. |

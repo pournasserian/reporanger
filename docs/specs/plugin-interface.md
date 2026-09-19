@@ -92,7 +92,7 @@ A declaration has these fields:
 | `overload_identity` | For C# methods, constructors, operators, and indexers: the string defined in [index-schema.sql](index-schema.sql), section 3. Otherwise null |
 | `parent` | The index of the enclosing declaration in this list, or null |
 | `span` | From the first line of its doc comment, attribute, or decorator (whichever comes first) to the end of its last token |
-| `name_range` | Its name alone. For constructors, the type name as written; for indexers, the `this` keyword; for operators, the `operator` keyword |
+| `name_range` | Its name alone. For constructors and finalizers, the type name as written; for indexers, the `this` keyword; for operators, the `operator` keyword; for an anonymous default export, the `function` or `class` keyword |
 | `signature`, `doc` | Section 4.4 |
 | `visibility`, `modifiers` | Section 4.4 |
 | `metrics` | `loc` always; `complexity`, `nesting`, and `params` for methods, constructors, finalizers, operators, and functions (section 5) |
@@ -310,5 +310,5 @@ The exact parsing rules for each belong to the M3 task specs.
 
 ## 10. Conformance and versions
 
-- **Conformance.** An extractor conforms when, for every golden fixture of its language (M0 item 5), its facts equal the expected facts once both are serialized as RFC 8785 canonical JSON. In-process extractors serialize their facts for the same comparison. Fixture index expectations test the core's rules in sections 6 to 8. Under ADR 0015, passing the fixtures is what makes a parser acceptable.
+- **Conformance.** An extractor conforms when, for every conformance case of its language, its facts equal the expected facts once both are serialized as RFC 8785 canonical JSON. A case is a source file beside its facts, as in `golden/syntax/csharp/basics.cs` and `basics.facts.json`; the [fixture design](fixture/README.md) explains how they are run and extended. In-process extractors serialize their facts for the same comparison. The fixture's expected counts and golden edges test the core's rules in sections 6 to 8. Under ADR 0015, passing these is what makes a parser acceptable.
 - **Versions.** `protocol_version` and `facts_version` are both 1. Any change to the messages or to the meaning of a fact increments the relevant one, and the core refuses a plugin whose versions it doesn't support, recording `analyzer_degraded`. While this document is Proposed, changes keep version 1, as with `schema_version`.
