@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "title": "RepoRanger plugin messages and facts",
+  "description": "JSON Schema for the params and results of the plugin protocol, and for SCIP indexer descriptors. plugin-interface.md explains every field. JSON-RPC 2.0 envelopes are standard and not repeated here.",
+
+  "methods": {
+    "initialize": { "params": "#/$defs/initialize_params", "result": "#/$defs/initialize_result" },
+    "extract": { "params": "#/$defs/extract_params", "result": "#/$defs/extract_result" },
+    "extract_manifests": { "params": "#/$defs/manifest_params", "result": "#/$defs/manifest_result" },
+    "shutdown": { "params": "none", "result": "null" },
+    "exit": { "params": "none", "notification": true }
+  },
+
+  "$defs": {
+    "range": {
+      "type": "array",
+      "description": "[start_line, start_col, end_line, end_col]: lines 1-based, columns 0-based UTF-8 byte offsets, end exclusive.",
+      "prefixItems": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 1 },
+        { "type": "integer", "minimum": 0 }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+
+    "initialize_params": {
+      "type": "object",
+      "properties": {
+        "protocol_version": { "const": 1 },
+        "core": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 }
+          },
+          "required": ["name", "version"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["protocol_version", "core"],
+      "additionalProperties": false
+    },
+
+    "initialize_result": {
+      "type": "object",
+      "properties": {
+        "protocol_version": { "const": 1 },
+        "facts_version": { "const": 1 },
+        "plugin": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 }
+          },
+          "required": ["name", "version"],
+          "additionalProperties": false
+        },
+        "kind": { "enum": ["syntax", "manifest"] },
+        "languages": {
+          "type": "array",
+          "description": "Syntax extractors: the languages they handle, as Language Server Protocol identifiers, with the files each covers.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "extensions": { "type": "array", "items": { "type": "string", "pattern": "^\\." } },
+              "file_names": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["id"],
+            "additionalProperties": false
+          }
+        },
+        "ecosystems": {
+          "type": "array",
+          "description": "Manifest extractors: the ecosystems they handle, as purl types, with the globs of their manifest and lockfiles.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "manifest_patterns": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+            },
+            "required": ["id", "manifest_patterns"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["protocol_version", "facts_version", "plugin", "kind"],
+      "additionalProperties": false,
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "syntax" } } }, "then": { "required": ["languages"] } },
+        { "if": { "properties": { "kind": { "const": "manifest" } } }, "then": { "required": ["ecosystems"] } }
+      ]
+    },
+
+    "extract_params": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string", "minLength": 1, "description": "Repository-relative, '/'-separated." },
+              "language": { "type": "string", "minLength": 1 },
+              "text": { "type": "string", "description": "The content as hashed: LF line endings, not redacted." }
+            },
+            "required": ["path", "language", "text"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["files"],
+      "additionalProperties": false
+    },
+
+    "extract_result": {
+      "type": "object",
+      "properties": {
+        "files": { "type": "array", "items": { "$ref": "#/$defs/file_facts" } }
+      },
+      "required": ["files"],
+      "additionalProperties": false
+    },
+
+    "file_facts": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "declarations": { "type": "array", "items": { "$ref": "#/$defs/declaration" } },
+        "call_sites": { "type": "array", "items": { "$ref": "#/$defs/range" }, "description": "The callee name range of each call." },
+        "imports": { "type": "array", "items": { "$ref": "#/$defs/import" } },
+        "lines": { "type": "integer", "minimum": 0 },
+        "loc": { "type": "integer", "minimum": 0 },
+        "test": { "type": "boolean" },
+        "entry_point": { "const": "main" },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "line": { "type": "integer", "minimum": 1 },
+              "message": { "type": "string" }
+            },
+            "required": ["line", "message"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["path", "declarations", "call_sites", "imports", "lines", "loc", "test", "errors"],
+      "additionalProperties": false
+    },
+
+    "declaration": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "class", "interface", "struct", "record", "enum", "delegate", "type_alias",
+            "method", "constructor", "finalizer", "operator", "function",
+            "property", "field", "constant", "enum_member", "event", "indexer", "variable"
+          ]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "qualified_name": { "type": "string", "minLength": 1 },
+        "overload_identity": { "type": ["string", "null"], "pattern": "^(`[0-9]+)?\\(.*\\)(->.+)?$" },
+        "parent": { "type": ["integer", "null"], "minimum": 0, "description": "Index of the enclosing declaration in this file's list." },
+        "span": { "$ref": "#/$defs/range" },
+        "name_range": { "$ref": "#/$defs/range" },
+        "signature": { "type": "string" },
+        "doc": { "type": "string" },
+        "visibility": { "enum": ["public", "protected", "internal", "private", "protected_internal", "private_protected", "module"] },
+        "modifiers": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "loc": { "type": "integer", "minimum": 0 },
+            "complexity": { "type": "integer", "minimum": 1 },
+            "nesting": { "type": "integer", "minimum": 0 },
+            "params": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["loc"],
+          "additionalProperties": false
+        },
+        "test": { "type": "boolean" },
+        "entry_point": { "const": "main" },
+        "merge": { "type": "boolean" },
+        "has_body": { "type": "boolean", "description": "False for overload signatures, abstract and interface members, and C# partial method declarations without an implementation." }
+      },
+      "required": ["kind", "name", "qualified_name", "overload_identity", "parent", "span", "name_range", "visibility", "modifiers", "metrics", "test", "merge", "has_body"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "enum": ["method", "constructor", "finalizer", "operator", "function"] } } },
+          "then": { "properties": { "metrics": { "required": ["loc", "complexity", "nesting", "params"] } } },
+          "else": { "properties": { "metrics": { "maxProperties": 1 } } }
+        }
+      ]
+    },
+
+    "import": {
+      "type": "object",
+      "properties": {
+        "module": { "type": "string", "minLength": 1, "description": "As written: './users.service', 'fastapi.routing', '.models', 'System.Linq'." },
+        "names": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "kind": { "enum": ["relative", "absolute", "namespace"] },
+        "line": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["module", "names", "kind", "line"],
+      "additionalProperties": false
+    },
+
+    "manifest_params": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "text": { "type": "string" }
+            },
+            "required": ["path", "text"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["files"],
+      "additionalProperties": false
+    },
+
+    "manifest_result": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "manifest": { "type": "string", "minLength": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "language": { "type": "string", "minLength": 1 },
+              "build": { "type": "string", "minLength": 1, "description": "msbuild, npm, pnpm, yarn, poetry, uv, pip, ..." },
+              "frameworks": { "type": "array", "items": { "type": "string" } },
+              "test": { "type": "boolean", "description": "The project references a test framework." }
+            },
+            "required": ["manifest", "name", "language", "build", "frameworks", "test"],
+            "additionalProperties": false
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "project": { "type": "string", "minLength": 1, "description": "The declaring project's manifest path." },
+              "ecosystem": { "type": "string", "minLength": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "declared": { "type": ["string", "null"], "description": "The version range as written; null when none is given." },
+              "scope": { "enum": ["runtime", "dev", "test", "build", "optional", "peer"] },
+              "direct": { "const": true }
+            },
+            "required": ["project", "ecosystem", "name", "declared", "scope", "direct"],
+            "additionalProperties": false
+          }
+        },
+        "locked": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lockfile": { "type": "string", "minLength": 1 },
+              "ecosystem": { "type": "string", "minLength": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "version": { "type": "string", "minLength": 1 },
+              "dependencies": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string", "minLength": 1 },
+                    "version": { "type": "string" }
+                  },
+                  "required": ["name"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["lockfile", "ecosystem", "name", "version", "dependencies"],
+            "additionalProperties": false
+          }
+        },
+        "package_entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "project": { "type": "string", "minLength": 1 },
+              "path": { "type": "string", "minLength": 1 }
+            },
+            "required": ["project", "path"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["projects", "dependencies", "locked", "package_entries"],
+      "additionalProperties": false
+    },
+
+    "indexer_descriptor": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "languages": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "project_patterns": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "tools": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "version_command": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+            },
+            "required": ["name", "version_command"],
+            "additionalProperties": false
+          }
+        },
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Arguments; {repo_root}, {project_dir}, {manifest}, and {output} are filled in per project."
+        },
+        "output": { "type": "string", "minLength": 1 },
+        "timeout_seconds": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["name", "languages", "project_patterns", "tools", "command", "output", "timeout_seconds"],
+      "additionalProperties": false
+    }
+  }
+}

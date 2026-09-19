@@ -22,6 +22,7 @@ The M0 contracts, written before any engine code ([development workflow](develop
 
 - [Index schema](specs/index-schema.sql): SQLite DDL for the index file, with the symbol-ID scheme, `schema_version`, and the index hash.
 - [MCP tools](specs/mcp-tools/) and [shared MCP definitions](specs/mcp-meta.json): request and response schemas for the 14 tools, plus `_meta`, paging, errors, resources, and limits. The [usage guidance](specs/mcp-usage.md) holds the server instructions and the usage prompt.
+- [Plugin interface](specs/plugin-interface.md) and its [message schema](specs/plugin-facts.json): syntax extractors, SCIP indexer descriptors, and manifest extractors; the rules for each language; and what the core builds from their facts.
 
 ## Decisions
 

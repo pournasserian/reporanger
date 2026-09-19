@@ -644,6 +644,8 @@ CREATE TABLE tags (
 --   indexer_missing        project  no SCIP indexer applies or is available; fallback
 --   document_missing       file     the project's SCIP index has no document for the file; fallback
 --   unresolved_references  file     references whose target is neither in the index nor external
+--   unmatched_definitions  file     SCIP definitions that match no declaration from the syntax
+--                                   pass (plugin-interface.md, section 7.3)
 --   analyzer_degraded      project  an extractor ran with reduced capability, for example
 --                          or file  scip-python without a resolvable environment
 CREATE TABLE diagnostics (
@@ -653,7 +655,7 @@ CREATE TABLE diagnostics (
   severity  TEXT    NOT NULL CHECK (severity IN ('error', 'warning', 'info')),
   code      TEXT    NOT NULL CHECK (code IN (
               'parse_error', 'indexer_failed', 'indexer_missing', 'document_missing',
-              'unresolved_references', 'analyzer_degraded')),
+              'unresolved_references', 'unmatched_definitions', 'analyzer_degraded')),
   line      INTEGER CHECK (line >= 1),
   count     INTEGER NOT NULL DEFAULT 1 CHECK (count >= 1),
   message   TEXT,     -- redacted; not hashed

@@ -20,7 +20,7 @@ Claude Code stops when the work looks done, so every task needs a check it can r
 | Location | Holds | When |
 | --- | --- | --- |
 | `docs/` | Requirements, design, decisions, plan | Now |
-| `docs/specs/` | The contracts: `index-schema.sql`, `mcp-tools/<tool>.json` and `mcp-meta.json` (JSON Schema for requests and responses), `plugin-interface.md`, `sensitivity-rules.md`, `fixture/README.md`, `golden/<language>.yaml` | M0 |
+| `docs/specs/` | The contracts: `index-schema.sql`, `mcp-tools/<tool>.json` and `mcp-meta.json` (JSON Schema for requests and responses), `mcp-usage.md` (server instructions and usage prompt), `plugin-interface.md` and `plugin-facts.json` (JSON Schema for plugin messages and facts), `sensitivity-rules.md`, `fixture/README.md`, `golden/<language>.yaml` | M0 |
 | `docs/specs/tasks/<milestone>-<nn>-<slug>.md` | One page per task, using the template below | From M0, for M1 onward |
 
 ### Task spec template
