@@ -1,0 +1,72 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_history",
+  "title": "Change history",
+  "description": "Commits that changed files, communities, or projects, newest first: sha, date, author, subject, PR and issue references, whether the commit is a bug fix, and the change and line counts. Renames are followed, so a file's history includes its earlier paths (old_path). For a community or project, each commit appears once, with its lines summed over the member files. include body adds the full message; include files adds the other files the commit changed.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "targets": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": { "type": "string", "minLength": 1 },
+        "description": "File, community, or project IDs, or path:line locators (which resolve to the file here)."
+      },
+      "since": { "type": "string", "format": "date-time", "description": "Only commits on or after this time." },
+      "include": {
+        "type": "array",
+        "items": { "enum": ["body", "files"] },
+        "uniqueItems": true,
+        "default": []
+      },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "required": ["targets"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "description": "By target as passed, then newest first, then sha.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "string" },
+            "commit": { "$ref": "../mcp-meta.json#/$defs/commit" },
+            "change": { "enum": ["A", "M", "R", "C"], "description": "For a file target: added, modified, renamed, or copied." },
+            "old_path": { "type": "string", "minLength": 1, "description": "The file's path in that commit, when it differs from today's path." },
+            "lines_added": { "type": ["integer", "null"], "minimum": 0, "description": "null for binary files." },
+            "lines_deleted": { "type": ["integer", "null"], "minimum": 0 },
+            "files": {
+              "type": "array",
+              "maxItems": 20,
+              "items": { "type": "string" },
+              "description": "Other files the commit changed, by path."
+            }
+          },
+          "required": ["target", "commit", "lines_added", "lines_deleted"],
+          "additionalProperties": false
+        }
+      },
+      "errors": { "$ref": "../mcp-meta.json#/$defs/target_errors" },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_symbol",
+  "title": "Symbol details",
+  "description": "Details of symbols: signature, doc comment, source snippet, metrics (cyclomatic complexity, nesting depth, lines of code, parameters), visibility and modifiers, importance, other declaration sites, and counts of callers, callees, references, and tests. A path:line target gives the innermost symbol at that line. Snippets come from the index's stored text, so they match the indexed state even when the working tree has moved on.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "targets": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 20,
+        "items": { "type": "string", "minLength": 1 },
+        "description": "Symbol IDs or path:line locators."
+      },
+      "include": {
+        "type": "array",
+        "items": { "enum": ["signature", "doc", "snippet", "metrics", "counts"] },
+        "uniqueItems": true,
+        "default": ["signature", "doc", "metrics"],
+        "description": "Optional sections to return."
+      },
+      "snippet_lines": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 400,
+        "default": 40,
+        "description": "Most source lines per snippet; longer snippets are clipped and marked truncated."
+      }
+    },
+    "required": ["targets"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "string" },
+            "symbol": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "signature": { "type": "string" },
+            "doc": { "type": "string" },
+            "snippet": { "$ref": "../mcp-meta.json#/$defs/snippet" },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "complexity": { "type": "integer", "minimum": 0 },
+                "nesting": { "type": "integer", "minimum": 0 },
+                "loc": { "type": "integer", "minimum": 0 },
+                "params": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            },
+            "visibility": { "enum": ["public", "protected", "internal", "private", "protected_internal", "private_protected", "module"] },
+            "modifiers": { "type": "array", "items": { "type": "string" } },
+            "importance": { "type": "number", "minimum": 0, "maximum": 1 },
+            "declarations": {
+              "type": "array",
+              "description": "Other declaration sites, such as the other parts of a partial type.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string", "minLength": 1 },
+                  "lines": { "$ref": "../mcp-meta.json#/$defs/lines" }
+                },
+                "required": ["path", "lines"],
+                "additionalProperties": false
+              }
+            },
+            "counts": {
+              "type": "object",
+              "properties": {
+                "callers": { "type": "integer", "minimum": 0 },
+                "callees": { "type": "integer", "minimum": 0 },
+                "references": { "type": "integer", "minimum": 0 },
+                "tests": { "type": "integer", "minimum": 0 }
+              },
+              "required": ["callers", "callees", "references", "tests"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["target", "symbol"],
+          "additionalProperties": false
+        }
+      },
+      "errors": { "$ref": "../mcp-meta.json#/$defs/target_errors" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

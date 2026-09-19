@@ -33,6 +33,7 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Index | The stored fact base for one repository at one ref. In the Embedded profile it is a single SQLite file. |
 | Index hash | An identifier for an index's content: the root of a SHA-256 Merkle tree with one leaf per file. The same commit, configuration, and extractor versions must produce the same hash. |
 | Lens | An analysis pass over the fact base (security, tests, observability, and so on) that runs within a token budget and emits findings. |
+| Locator | A `path:line` target in an MCP call. It resolves to the innermost symbol whose span covers the line, or to the file. |
 | MCP | [Model Context Protocol](https://modelcontextprotocol.io/): the standard that lets coding agents call RepoRanger's queries as tools. |
 | Model role | A named job for a model: `extract`, `triage`, `synthesize`, `verify`, or `embed`. Features ask for a role, not a specific model. |
 | Module (product) | One of the eight feature groups, such as Module 1 — Ingest & Index. See [feature groups](feature-groups.md). |
@@ -41,12 +42,13 @@ Terms used across the RepoRanger docs, in alphabetical order.
 | Provenance | Where a fact came from: file, line range, commit, and the extractor that produced it. Within an index, the commit is the indexed commit. |
 | Renderer | Turns findings and summaries into outputs: documents, llms.txt or AGENTS.md files, and backlog items. |
 | Resolution level | How an edge's target was identified: `resolved` exactly (by a compiler through SCIP, or by a structural fact such as containment, a manifest, or git history), `import-scoped` (unique within imported files), or `name-match` (a repo-wide guess). The weight, not the level, says how strong the link is. See [ADR 0012](decisions/0012-resolution-levels-for-every-edge.md). |
+| Response budget | The most an MCP response may hold: 8,000 estimated tokens, counted as UTF-8 bytes ÷ 4. A longer answer is cut, marked `truncated`, and continued with a cursor. |
 | SCIP | [Source Code Intelligence Protocol](https://github.com/scip-code/scip): a language-agnostic index format emitted by compiler-backed indexers such as scip-dotnet, scip-typescript, and scip-python. RepoRanger's primary extraction source. |
 | SARIF | [Static Analysis Results Interchange Format](https://sarifweb.azurewebsites.net/), a standard JSON format for analysis results. |
 | Sensitivity policy | Rules that stop files such as secrets, keys, and credentials from ever reaching an LLM. |
 | Snapshot, snapshot diff | An index of a specific ref, and the difference between two such indexes (P1). |
-| Staleness check | On every MCP call, a comparison of the index with the working tree; changed files are refreshed within a bound, otherwise the response is flagged `stale` in its `_meta` block. |
+| Staleness check | On every MCP call, a comparison of the index with the working tree. Up to 20 changed files are refreshed within 2 seconds: the syntax pass and stored text are redone, and SCIP re-resolution waits for the next index run. Otherwise the response is flagged `stale` in its `_meta` block. |
 | Storage capability | One part of the data-access contract: NodeStore, EdgeStore, TextIndex, SummaryStore, or VectorIndex. |
 | Symbol ID | A symbol's stable identifier: `path::kind::qualified-name`, plus a signature hash for C# overloads. External symbols use `ext:` and their SCIP symbol. See [ADR 0014](decisions/0014-symbol-id-scheme.md) and the [index schema](specs/index-schema.sql). |
 | Syntax pass | The parse every code file gets, whether or not its project builds. It supplies declaration spans, kinds, names, parameters, doc comments, metrics, and call sites, and SCIP adds resolution on top. See [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md). |
-| `_meta` | The block on every MCP response: indexed commit, index age, stale flag, schema version. |
+| `_meta` | The block on every MCP response: repository, indexed commit, index age, stale flag, schema version, index state, and freshness counts (refreshed, pending, and changed files). |

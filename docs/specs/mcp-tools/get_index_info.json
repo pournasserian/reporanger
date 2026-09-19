@@ -1,0 +1,117 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_index_info",
+  "title": "Index information",
+  "description": "Describe the index of a repository: the indexed commit, index hash, schema version, extractors, counts of nodes, edges, and files, a health summary (skipped files, diagnostics, projects on the fallback, files pending SCIP re-resolution), and the current or last index run with its progress.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "index": {
+        "type": "object",
+        "properties": {
+          "repo": { "type": "string" },
+          "source": { "type": ["string", "null"], "description": "Clone URL or origin remote, credentials removed." },
+          "ref": { "type": ["string", "null"], "description": "The branch, tag, or commit requested; null for the checked-out HEAD." },
+          "indexed_commit": { "type": ["string", "null"], "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$" },
+          "indexed_commit_time": { "type": ["string", "null"], "format": "date-time" },
+          "index_hash": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+          "schema_version": { "type": "integer", "minimum": 1 },
+          "state": { "enum": ["building", "ready"] },
+          "history": { "enum": ["full", "window", "shallow", "none"] },
+          "pseudonymized": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" },
+          "tool_version": { "type": "string" },
+          "extractors": { "type": "array", "items": { "type": "string" }, "description": "Every extractor as name@version." }
+        },
+        "required": ["repo", "source", "ref", "indexed_commit", "indexed_commit_time", "index_hash", "schema_version", "state", "history", "pseudonymized", "created_at", "updated_at", "tool_version", "extractors"],
+        "additionalProperties": false
+      },
+      "counts": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "object",
+            "propertyNames": { "$ref": "../mcp-meta.json#/$defs/node_kind" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "symbols": {
+            "type": "object",
+            "description": "Symbols in the repository by fine kind, plus 'external' for external symbols.",
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "edges": {
+            "type": "object",
+            "description": "By edge type, then by resolution level.",
+            "propertyNames": { "$ref": "../mcp-meta.json#/$defs/edge_type" },
+            "additionalProperties": {
+              "type": "object",
+              "propertyNames": { "$ref": "../mcp-meta.json#/$defs/resolution" },
+              "additionalProperties": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "files": {
+            "type": "object",
+            "description": "By extraction status.",
+            "propertyNames": { "$ref": "../mcp-meta.json#/$defs/extraction" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "required": ["nodes", "symbols", "edges", "files"],
+        "additionalProperties": false
+      },
+      "health": {
+        "type": "object",
+        "properties": {
+          "skipped": {
+            "type": "object",
+            "description": "Skipped files by reason.",
+            "propertyNames": { "$ref": "../mcp-meta.json#/$defs/skip_reason" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "diagnostics": {
+            "type": "object",
+            "description": "Diagnostic counts by code.",
+            "propertyNames": { "$ref": "../mcp-meta.json#/$defs/diagnostic_code" },
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          },
+          "fallback_projects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project": { "$ref": "../mcp-meta.json#/$defs/node" },
+                "reason": { "$ref": "../mcp-meta.json#/$defs/diagnostic_code" }
+              },
+              "required": ["project", "reason"],
+              "additionalProperties": false
+            }
+          },
+          "pending_files": { "type": "integer", "minimum": 0 },
+          "unresolved_references": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["skipped", "diagnostics", "fallback_projects", "pending_files", "unresolved_references"],
+        "additionalProperties": false
+      },
+      "run": { "$ref": "../mcp-meta.json#/$defs/run" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["index", "counts", "health", "run", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

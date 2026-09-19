@@ -1,0 +1,76 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "search",
+  "title": "Search",
+  "description": "Full-text search, returned as two separately ranked lists. symbols matches words in symbol names, qualified names, signatures, and doc comments, with camelCase and snake_case split, so 'user' finds GetUserById. text matches any substring of three or more characters in the indexed text of every file, code or not, ignoring case, and returns each matching line with context_lines of context. Both lists are ranked by BM25, then by id; their scores aren't comparable, so they aren't merged. The text is the index's stored text, with secrets redacted.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "query": { "type": "string", "minLength": 1, "maxLength": 200, "description": "Words or a literal substring. Text matching needs at least three characters." },
+      "scope": { "type": "string", "enum": ["all", "symbols", "text"], "default": "all" },
+      "languages": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+      "path": { "type": "string", "minLength": 1, "description": "A glob over file paths: * within a directory, ** across directories." },
+      "kinds": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "class", "interface", "struct", "record", "enum", "delegate", "type_alias",
+            "method", "constructor", "finalizer", "operator", "function",
+            "property", "field", "constant", "enum_member", "event", "indexer", "variable"
+          ]
+        },
+        "description": "Symbol kinds to keep; applies to the symbols list."
+      },
+      "is_test": { "type": "boolean", "description": "true: only tests and test files; false: none." },
+      "context_lines": { "type": "integer", "minimum": 0, "maximum": 5, "default": 1, "description": "Lines of context around each text match." },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20, "description": "Most items per list." },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "required": ["query"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "symbols": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "node": { "$ref": "../mcp-meta.json#/$defs/node" }
+          },
+          "required": ["node"],
+          "additionalProperties": false
+        }
+      },
+      "text": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "line": { "type": "integer", "minimum": 1, "description": "The matching line." },
+            "snippet": { "$ref": "../mcp-meta.json#/$defs/snippet" }
+          },
+          "required": ["path", "line", "snippet"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["symbols", "text", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

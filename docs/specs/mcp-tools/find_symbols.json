@@ -1,0 +1,62 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "find_symbols",
+  "title": "Find symbols",
+  "description": "Find symbols by name, kind, language, or path. query matches names case-insensitively: an exact name first, then a name prefix, then words within names (camelCase and snake_case are split, so 'user' finds GetUserById). Without query, the filters alone select symbols. Ties go to the more important symbol, then by id. External symbols (from packages and the base library) are left out unless include_external is true.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "query": { "type": "string", "minLength": 1, "maxLength": 200, "description": "A name, a name prefix, or words." },
+      "kinds": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "class", "interface", "struct", "record", "enum", "delegate", "type_alias",
+            "method", "constructor", "finalizer", "operator", "function",
+            "property", "field", "constant", "enum_member", "event", "indexer", "variable"
+          ]
+        },
+        "description": "Symbol kinds to keep, such as [\"class\", \"interface\"]."
+      },
+      "languages": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "Language Server Protocol identifiers, like csharp or python." },
+      "path": { "type": "string", "minLength": 1, "description": "A glob over file paths: * within a directory, ** across directories." },
+      "is_test": { "type": "boolean", "description": "true: only tests; false: no tests." },
+      "include_external": { "type": "boolean", "default": false },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "node": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "match": { "enum": ["exact", "prefix", "words", "filter"], "description": "Why it matched, in ranking order." }
+          },
+          "required": ["node", "match"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

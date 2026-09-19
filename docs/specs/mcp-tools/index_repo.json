@@ -1,0 +1,45 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "index_repo",
+  "title": "Index a repository",
+  "description": "Start or resume indexing a registered repository in the background, and return the run's state at once. Incremental by default: only changed files are re-extracted, and SCIP re-runs for projects with changes, which also resolves files that automatic refreshes left pending. Set wait_seconds to block for up to that long; progress notifications are sent when the request carries a progress token. get_index_info reports progress. Registering a new repository is a CLI command, not a tool.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "mode": {
+        "type": "string",
+        "enum": ["incremental", "full"],
+        "default": "incremental",
+        "description": "full rebuilds the index from scratch, as after a schema_version change."
+      },
+      "wait_seconds": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 300,
+        "default": 0,
+        "description": "How long to wait for the run to finish before returning its state."
+      }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "run": { "$ref": "../mcp-meta.json#/$defs/run" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["run", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": true
+  }
+}

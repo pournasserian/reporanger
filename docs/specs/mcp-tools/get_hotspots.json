@@ -1,0 +1,54 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_hotspots",
+  "title": "Hotspots",
+  "description": "Files ranked by hotspot score, recency-weighted churn times complexity: where change concentrates in complex code. Each result gives the components behind the score: churn, commits, complexity, age, the last commit, and bug-fix commits. Filter by path glob, community, or language. Order: highest hotspot first, then id.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "path": { "type": "string", "minLength": 1, "description": "A glob over file paths: * within a directory, ** across directories." },
+      "community": { "type": "string", "minLength": 1, "description": "A community ID; only its member files." },
+      "languages": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "file": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "hotspot": { "type": "number", "minimum": 0 },
+            "churn": { "type": "number", "minimum": 0 },
+            "commits": { "type": "integer", "minimum": 0 },
+            "complexity": { "type": "number", "minimum": 0 },
+            "age_days": { "type": "integer", "minimum": 0 },
+            "last_commit": { "type": "string", "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$" },
+            "bugfix_commits": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["file", "hotspot", "churn", "commits", "complexity", "age_days", "last_commit", "bugfix_commits"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

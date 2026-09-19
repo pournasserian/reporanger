@@ -1,0 +1,124 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "repo_map",
+  "title": "Repository map",
+  "description": "A structural overview of a repository: languages, projects, entry points, main package dependencies, and its communities (modules found from the code's dependencies, largest first), each with its most important symbols. The first page carries every section; later pages carry more communities only.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "communities": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 50,
+        "default": 12,
+        "description": "Most communities per page."
+      },
+      "symbols_per_community": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20,
+        "default": 5,
+        "description": "Most important symbols listed for each community."
+      },
+      "cursor": {
+        "type": "string",
+        "minLength": 1,
+        "description": "next_cursor from the previous page; keep the other arguments the same."
+      }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "languages": {
+        "type": "array",
+        "description": "Most lines of code first.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "language": { "type": "string" },
+            "files": { "type": "integer", "minimum": 0 },
+            "loc": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["language", "files", "loc"],
+          "additionalProperties": false
+        }
+      },
+      "projects": {
+        "type": "array",
+        "description": "By path.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "project": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "extraction": { "enum": ["scip", "fallback"] },
+            "indexer": { "type": ["string", "null"] }
+          },
+          "required": ["project", "extraction", "indexer"],
+          "additionalProperties": false
+        }
+      },
+      "entry_points": {
+        "type": "array",
+        "maxItems": 10,
+        "items": { "$ref": "../mcp-meta.json#/$defs/entry_point" }
+      },
+      "packages": {
+        "type": "array",
+        "maxItems": 20,
+        "description": "Direct dependencies, the ones the most projects declare first.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "package": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "version": { "type": ["string", "null"] },
+            "dependents": { "type": "integer", "minimum": 1, "description": "Projects that declare it." }
+          },
+          "required": ["package", "version", "dependents"],
+          "additionalProperties": false
+        }
+      },
+      "communities": {
+        "type": "array",
+        "description": "Largest first.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "community": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "size": { "type": "integer", "minimum": 1, "description": "Member files." },
+            "top_symbols": {
+              "type": "array",
+              "description": "Highest importance first.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "node": { "$ref": "../mcp-meta.json#/$defs/node" },
+                  "importance": { "type": "number", "minimum": 0, "maximum": 1 }
+                },
+                "required": ["node", "importance"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["community", "size", "top_symbols"],
+          "additionalProperties": false
+        }
+      },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["communities", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

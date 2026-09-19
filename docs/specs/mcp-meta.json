@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "title": "RepoRanger MCP surface: shared definitions and conventions",
+  "description": "The shared part of the MCP contract (M0 item 2): the server, the rules every tool follows, the numbers they share, error codes, the two resources, the usage prompt, and the $defs that the tool files in mcp-tools/ reference. Targets the MCP specification 2026-07-28. It is stack-neutral: every implementation serves the same surface.",
+
+  "server": {
+    "name": "reporanger",
+    "title": "RepoRanger",
+    "instructions": "The text in the 'Server instructions' section of mcp-usage.md, served verbatim."
+  },
+
+  "conventions": {
+    "files": "Each mcp-tools/<name>.json is the MCP Tool object that the server lists, plus a $comment status line that the server strips. Input schemas are self-contained. Output schemas reference this file's $defs as '../mcp-meta.json#/$defs/<name>'. Before serving, the server copies every definition they reach into the tool's own $defs and rewrites those references to '#/$defs/<name>'. Tool files define no $defs of their own. Keys in this file that aren't MCP fields (contents, text) document the contract and aren't served.",
+    "results": "A successful call returns structuredContent that conforms to the tool's outputSchema, and the same JSON, serialized, in one text content block. structuredContent always carries the _meta block.",
+    "errors": "A call that can't be answered at all returns isError: true, with one text content block that holds an error_result (see $defs) and no structuredContent. Unknown tools and malformed requests are JSON-RPC protocol errors. When a call has several targets, a failing target doesn't fail the call: it is reported in errors, and the other targets are answered.",
+    "repo": "Every tool takes an optional repo, the name of a registered repository. Without it, the server uses the registered repository that contains its working directory, or else the only registered repository; otherwise it fails with repo_required. Registering a repository is a CLI command; no tool does it.",
+    "targets": "targets holds 1 to 50 strings. Each one is either a node ID, or a path:line locator that resolves to the innermost stored symbol whose span covers that line, or to the file when no symbol does. A string that is an exact node ID is never read as a locator.",
+    "paging": "List tools take limit and cursor. When more items exist, the result has next_cursor; pass it back unchanged, with the other arguments unchanged too. A cursor embeds the index hash, so a cursor issued before the index changed fails with cursor_expired.",
+    "budget": "A response stops adding items once its estimated size would pass limits.response_budget_tokens. It then sets truncated, and returns next_cursor when the tool pages. Estimated tokens are ceil(UTF-8 bytes / 4) of the serialized structuredContent; pack_context counts the same way.",
+    "truncated": "truncated is true whenever the answer is incomplete for the request: more items exist, the budget cut the page, a snippet was clipped, or a traversal stopped before its depth.",
+    "include": "Tools with include return only the optional sections it names; without include, they return the default set given in their schema.",
+    "globs": "A path filter is a glob over file paths: * matches within one directory, ** matches across directories, and ? matches one character.",
+    "provenance": "Every node carries its path and lines where it has a location. Every edge carries its resolution, the path of the file that establishes it, and the lines of its sites. The commit behind every fact is _meta.indexed_commit. get_index_info lists the extractors with their versions.",
+    "freshness": "Before answering, every tool except index_repo compares HEAD and file contents with the index. If at most limits.refresh.max_files files changed and the refresh fits in limits.refresh.max_seconds (both configurable), those files are refreshed first: the syntax pass and the stored text are redone. Refreshed files that had SCIP resolution get extraction 'syntax', and their outgoing edges keep the last SCIP resolution and are reported as pending until index_repo runs. Otherwise the answer comes from the index as it is, with _meta.stale true and _meta.changed set. An automatic refresh only updates RepoRanger's own index, so query tools are marked read-only.",
+    "impact": "get_impact treats its targets as one change set. Upstream it follows incoming CALLS and REFERENCES and outgoing INHERITS and IMPLEMENTS, so callers of an interface member are reached from its implementations; downstream it follows the opposite directions. Items are ordered by depth, then importance, then id. Traversal stops after the level at which limit is reached; levels gives exact counts for every level it finished. Each item's resolution is the weakest level on the path that reached it.",
+    "dates": "Dates are ISO 8601 in UTC, for example 2026-09-19T14:05:00Z.",
+    "ordering": "Every list has a stated order that ends in a tiebreak by id, so the same index and arguments always give the same pages."
+  },
+
+  "limits": {
+    "targets_max": 50,
+    "response_budget_tokens": 8000,
+    "refresh": {
+      "max_files": 20,
+      "max_seconds": 2
+    },
+    "get_impact": {
+      "depth_default": 3,
+      "depth_max": 6,
+      "limit_default": 100,
+      "limit_max": 500,
+      "p95_ms": 300,
+      "p95_scope": "Each of the 20 highest-importance symbols in the microsoft/agent-framework index, at the default depth and limit, on a laptop with a warm cache. M2's deep-traversal check measures it."
+    },
+    "pack_context": {
+      "budget_default": 6000,
+      "budget_min": 500,
+      "budget_max": 20000
+    },
+    "server_instructions_max_bytes": 2048
+  },
+
+  "error_codes": {
+    "invalid_argument": "An argument breaks the input schema or a rule stated in the tool's description.",
+    "repo_required": "Several repositories are registered, and none was named or contains the server's working directory.",
+    "repo_not_found": "No registered repository has that name.",
+    "index_missing": "The repository has no index yet; run index_repo.",
+    "schema_mismatch": "The index was written with another schema_version; run index_repo with mode full.",
+    "invalid_cursor": "This tool didn't issue the cursor for these arguments.",
+    "cursor_expired": "The index changed after the cursor was issued; start again without it."
+  },
+
+  "target_error_codes": {
+    "not_found": "No node has that ID, or the locator's file isn't in the index.",
+    "invalid_locator": "The locator's line is outside its file.",
+    "unsupported_target": "The node exists, but this tool doesn't accept its kind."
+  },
+
+  "resources": [
+    {
+      "uriTemplate": "reporanger://repo/{name}/map",
+      "name": "repo-map",
+      "title": "Repository map",
+      "description": "The structural overview of a registered repository, as repo_map returns it with default arguments.",
+      "mimeType": "application/json",
+      "contents": "The structuredContent of repo_map with repo set to {name} and default arguments."
+    },
+    {
+      "uriTemplate": "reporanger://repo/{name}/index",
+      "name": "index-info",
+      "title": "Index information",
+      "description": "Index state, counts, health, and freshness of a registered repository, as get_index_info returns them.",
+      "mimeType": "application/json",
+      "contents": "The structuredContent of get_index_info with repo set to {name}."
+    }
+  ],
+
+  "prompts": [
+    {
+      "name": "usage",
+      "title": "How to use RepoRanger",
+      "description": "A guide to RepoRanger's tools: which tool answers which question, targets and batching, resolution levels, impact depth, paging, and freshness.",
+      "arguments": [
+        {
+          "name": "repo",
+          "description": "The registered repository the guide should name. Optional.",
+          "required": false
+        }
+      ],
+      "text": "The text in the 'Usage prompt' section of mcp-usage.md, returned as one user message with {repo} replaced by the argument or by the default repository's name."
+    }
+  ],
+
+  "$defs": {
+    "meta": {
+      "type": "object",
+      "description": "Index freshness, on every result.",
+      "properties": {
+        "repo": { "type": "string", "description": "The registered repository that answered." },
+        "indexed_commit": {
+          "type": ["string", "null"],
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+          "description": "The commit every fact comes from; null when the source isn't a git repository."
+        },
+        "index_age": { "type": "integer", "minimum": 0, "description": "Seconds since the last completed index run. Automatic refreshes don't reset it." },
+        "stale": { "type": "boolean", "description": "The answer comes from an index that lags the working tree: more files changed than a refresh covers." },
+        "schema_version": { "type": "integer", "minimum": 1 },
+        "state": { "enum": ["building", "ready"], "description": "building while an index run is in progress." },
+        "dirty": { "type": "boolean", "description": "The index includes content that differs from indexed_commit, such as uncommitted edits." },
+        "refreshed": { "type": "integer", "minimum": 0, "description": "Files this call refreshed before answering." },
+        "pending": { "type": "integer", "minimum": 0, "description": "Files with extraction 'syntax': their outgoing edges reflect the last SCIP run until index_repo runs." },
+        "changed": { "type": "integer", "minimum": 0, "description": "Changed files the index doesn't reflect; more than zero only when stale is true." }
+      },
+      "required": ["repo", "indexed_commit", "index_age", "stale", "schema_version", "state", "dirty", "refreshed", "pending", "changed"],
+      "additionalProperties": false
+    },
+
+    "node": {
+      "type": "object",
+      "description": "A node in the index. path and lines are its provenance.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "Stable ID; pass it back as a target." },
+        "kind": { "$ref": "#/$defs/node_kind" },
+        "symbol_kind": { "$ref": "#/$defs/symbol_kind" },
+        "name": { "type": "string" },
+        "qualified_name": { "type": "string" },
+        "path": { "type": "string", "minLength": 1 },
+        "lines": { "$ref": "#/$defs/lines" },
+        "language": { "type": "string" },
+        "is_external": { "type": "boolean" },
+        "is_test": { "type": "boolean" }
+      },
+      "required": ["id", "kind", "name"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "symbol" }, "is_external": { "const": false } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["symbol_kind", "path", "lines"] }
+        },
+        {
+          "if": {
+            "properties": { "kind": { "enum": ["file", "project"] } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": {
+            "properties": { "is_external": { "const": true } },
+            "required": ["is_external"]
+          },
+          "then": { "properties": { "kind": { "const": "symbol" } }, "not": { "required": ["lines"] } }
+        }
+      ]
+    },
+
+    "lines": {
+      "type": "array",
+      "description": "[start, end], 1-based and inclusive.",
+      "prefixItems": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "integer", "minimum": 1 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+
+    "edge": {
+      "type": "object",
+      "description": "A relationship between a target and a neighboring node.",
+      "properties": {
+        "target": { "type": "string", "description": "The target this item answers, as it was passed in." },
+        "direction": { "enum": ["in", "out"], "description": "in: node -> target. out: target -> node." },
+        "type": { "$ref": "#/$defs/edge_type" },
+        "node": { "$ref": "#/$defs/node" },
+        "weight": { "type": "number", "exclusiveMinimum": 0 },
+        "resolution": { "$ref": "#/$defs/resolution" },
+        "path": { "type": "string", "minLength": 1, "description": "The file whose content establishes the edge; absent for edges derived from history or structure." },
+        "sites": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "uniqueItems": true,
+          "description": "Lines in path where the occurrences are, ascending."
+        },
+        "pending": { "const": true, "description": "Present when path awaits SCIP re-resolution: the edge reflects the file before its latest edit." },
+        "attrs": {
+          "type": "object",
+          "description": "Type-specific details: DEPENDS_ON {declared, scope, direct}, CO_CHANGES {shared}, TESTS {evidence}."
+        }
+      },
+      "required": ["target", "direction", "type", "node", "weight", "resolution"],
+      "additionalProperties": false
+    },
+
+    "weighted_node": {
+      "type": "object",
+      "properties": {
+        "node": { "$ref": "#/$defs/node" },
+        "weight": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["node", "weight"],
+      "additionalProperties": false
+    },
+
+    "entry_point": {
+      "type": "object",
+      "properties": {
+        "node": { "$ref": "#/$defs/node" },
+        "reason": { "enum": ["main", "package_entry"] }
+      },
+      "required": ["node", "reason"],
+      "additionalProperties": false
+    },
+
+    "snippet": {
+      "type": "object",
+      "properties": {
+        "start_line": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string", "description": "Source lines joined with LF, redacted by the sensitivity rules." },
+        "truncated": { "type": "boolean" }
+      },
+      "required": ["start_line", "text"],
+      "additionalProperties": false
+    },
+
+    "commit": {
+      "type": "object",
+      "properties": {
+        "sha": { "type": "string", "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$" },
+        "date": { "type": "string", "format": "date-time", "description": "Committer date." },
+        "author": { "type": "string" },
+        "author_email": { "type": "string" },
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["pr", "issue", "unknown"] },
+              "ref": { "type": "string", "description": "As written, like #123 or owner/repo#123." }
+            },
+            "required": ["kind", "ref"],
+            "additionalProperties": false
+          }
+        },
+        "is_bugfix": { "type": "boolean" }
+      },
+      "required": ["sha", "date", "author", "author_email", "subject", "refs", "is_bugfix"],
+      "additionalProperties": false
+    },
+
+    "run": {
+      "type": "object",
+      "description": "The current index run, or the last one.",
+      "properties": {
+        "state": { "enum": ["none", "running", "completed", "failed"] },
+        "mode": { "enum": ["incremental", "full"] },
+        "started_at": { "type": "string", "format": "date-time" },
+        "finished_at": { "type": "string", "format": "date-time" },
+        "phase": { "type": "string", "description": "What the run is doing, such as discovery, syntax, scip, history, or structure." },
+        "progress": {
+          "type": "object",
+          "properties": {
+            "done": { "type": "integer", "minimum": 0 },
+            "total": { "type": "integer", "minimum": 0 },
+            "unit": { "const": "files" }
+          },
+          "required": ["done", "total", "unit"],
+          "additionalProperties": false
+        },
+        "message": { "type": "string" }
+      },
+      "required": ["state"],
+      "additionalProperties": false
+    },
+
+    "next_cursor": { "type": "string", "minLength": 1, "description": "Pass back as cursor for the next page." },
+    "truncated": { "type": "boolean", "description": "The answer is incomplete for the request." },
+    "target_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "target": { "type": "string" },
+          "code": { "$ref": "#/$defs/target_error_code" },
+          "message": { "type": "string" }
+        },
+        "required": ["target", "code", "message"],
+        "additionalProperties": false
+      }
+    },
+
+    "error_result": {
+      "type": "object",
+      "description": "The JSON in the text block of an isError result. _meta is present when an index exists.",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": { "$ref": "#/$defs/error_code" },
+            "message": { "type": "string" },
+            "details": { "type": "object" }
+          },
+          "required": ["code", "message"],
+          "additionalProperties": false
+        },
+        "_meta": { "$ref": "#/$defs/meta" }
+      },
+      "required": ["error"],
+      "additionalProperties": false
+    },
+
+    "error_code": { "enum": ["invalid_argument", "repo_required", "repo_not_found", "index_missing", "schema_mismatch", "invalid_cursor", "cursor_expired"] },
+    "target_error_code": { "enum": ["not_found", "invalid_locator", "unsupported_target"] },
+    "node_kind": { "enum": ["repo", "project", "file", "symbol", "package", "community"] },
+    "symbol_kind": {
+      "enum": [
+        "class", "interface", "struct", "record", "enum", "delegate", "type_alias",
+        "method", "constructor", "finalizer", "operator", "function",
+        "property", "field", "constant", "enum_member", "event", "indexer", "variable"
+      ]
+    },
+    "edge_type": { "enum": ["CONTAINS", "IMPORTS", "CALLS", "REFERENCES", "INHERITS", "IMPLEMENTS", "TESTS", "DEPENDS_ON", "CO_CHANGES"] },
+    "resolution": { "enum": ["resolved", "import-scoped", "name-match"] },
+    "extraction": { "enum": ["scip", "fallback", "syntax", "text", "skipped"] },
+    "skip_reason": { "enum": ["generated", "vendored", "minified", "binary", "too_large", "excluded", "encoding"] },
+    "diagnostic_code": { "enum": ["parse_error", "indexer_failed", "indexer_missing", "document_missing", "unresolved_references", "analyzer_degraded"] }
+  }
+}

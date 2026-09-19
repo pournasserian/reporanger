@@ -93,6 +93,9 @@ How queries run:
 
 ## Incremental re-indexing and freshness
 
+> [!NOTE]
+> The freshness rules and the refresh bound are now specified in [mcp-meta.json](../../specs/mcp-meta.json) (`conventions.freshness` and `limits.refresh`).
+
 - A Merkle tree over the file manifest finds what changed.
 - Only changed files are re-extracted. For SCIP projects the indexer re-runs per project; the importer replaces only the documents whose hash changed. Edges are recomputed for changed files and their direct neighbors.
 - Writes are committed per batch, so an interrupted run resumes by rerunning: files already indexed at the same content hash are skipped.
@@ -101,6 +104,9 @@ How queries run:
 - Every response carries `_meta`: `indexed_commit`, `index_age`, `stale`, `schema_version`.
 
 ## MCP surface (v1)
+
+> [!NOTE]
+> Superseded by the MCP contracts: [mcp-meta.json](../../specs/mcp-meta.json), the tools in [mcp-tools/](../../specs/mcp-tools/), and [mcp-usage.md](../../specs/mcp-usage.md).
 
 Terse outputs, provenance and `_meta` on every response. Every list tool accepts many targets, paginates with `limit`/`cursor`, and expands with `include` flags. The same handlers back the CLI and, later, the UI.
 
@@ -169,11 +175,11 @@ The reference implementation is C#/.NET ([ADR 0010](../../decisions/0010-dotnet-
 - **Hotspots:** decayed churn × complexity, shipped in M3 with the history signals; the coverage factor returns in P1.
 - **Freshness:** staleness check with bounded refresh on every MCP call, and `_meta` on every response.
 - **Symbol IDs:** a syntax pass runs on every code file, and IDs are computed from it in both modes, so fallback and SCIP IDs match once a project starts building. See the [index schema](../../specs/index-schema.sql), [ADR 0013](../../decisions/0013-syntax-pass-on-every-code-file.md), and [ADR 0014](../../decisions/0014-symbol-id-scheme.md).
+- **Impact depth and latency:** `get_impact` defaults to depth 3, with a maximum of 6. It returns ranked, capped results, with a p95 target of 300 ms on agent-framework ([mcp-meta.json](../../specs/mcp-meta.json)).
+- **Refresh bound:** up to 20 changed files are refreshed within 2 seconds, at the syntax level, with SCIP re-resolution pending until the next index run ([mcp-meta.json](../../specs/mcp-meta.json)).
 
 ## Still open for M0
 
-- The default and maximum depth cap for `get_impact`, and its p95 latency target.
-- The refresh bound for the staleness check (files and time budget).
 - Leiden versus Louvain for the reference implementation, given library availability in .NET.
 - The exact SCIP indexer invocation per project type (solution versus project for scip-dotnet; monorepo packages for scip-typescript; virtual environments for scip-python).
 - **History cost:** with full history as the default, how long does file-level history take on agent-framework? M3 measures it, and the default is revisited if it is too slow.
