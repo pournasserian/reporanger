@@ -26,6 +26,7 @@ The M0 contracts, written before any engine code ([development workflow](develop
 - [Sensitivity rules](specs/sensitivity-rules.md) and the [rule set](specs/sensitivity-rules.json): what counts as a secret, how it is redacted or withheld, and where redaction runs.
 - [Configuration](specs/config.md) and its [schema](specs/config.schema.json): the repository registry, per-repository settings, discovery defaults, and the effective configuration behind `config_hash`.
 - [Fixture and golden samples](specs/fixture/README.md): the in-repo fixture's design, the [golden schema](specs/golden/golden.schema.json), the per-language [samples](specs/golden/csharp.toml), and the [syntax conformance cases](specs/golden/syntax).
+- [Task specs](specs/tasks/README.md): one page per M1 task, in dependency order, each naming the contracts it implements, the tests to write first, and the command that proves it works.
 
 ## Decisions
 
