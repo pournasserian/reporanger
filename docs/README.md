@@ -16,6 +16,12 @@ RepoRanger is in the design phase. These documents are the source of truth for w
 - [Feature catalog](modules/01-ingest-and-index/feature-catalog.md): every Module 1 capability and idea, with its phase.
 - [Design notes (draft)](modules/01-ingest-and-index/design-notes.md): the early technical sketch, input for the M0 contracts.
 
+## Specs
+
+The M0 contracts, written before any engine code ([development workflow](development-workflow.md#specs-in-the-repository)).
+
+- [Index schema](specs/index-schema.sql): SQLite DDL for the index file, with the symbol-ID scheme, `schema_version`, and the index hash.
+
 ## Decisions
 
 - [Architecture decision records](decisions/README.md): one short record per decision, with its status.

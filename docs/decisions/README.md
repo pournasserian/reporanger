@@ -17,6 +17,9 @@ Each record captures one significant decision: its context, the decision, and it
 | [0009](0009-build-the-index-in-house.md) | Build the Module 1 index in-house | Accepted | 2026-09-19 |
 | [0010](0010-dotnet-reference-implementation.md) | C#/.NET builds the Module 1 reference implementation | Accepted | 2026-09-19 |
 | [0011](0011-scip-first-extraction.md) | Import code structure from SCIP indexes; tree-sitter only as a fallback | Accepted | 2026-09-19 |
+| [0012](0012-resolution-levels-for-every-edge.md) | Every edge carries a resolution level; structural edges are `resolved` | Accepted | 2026-09-19 |
+| [0013](0013-syntax-pass-on-every-code-file.md) | A syntax pass runs on every code file; SCIP adds resolution | Accepted | 2026-09-19 |
+| [0014](0014-symbol-id-scheme.md) | Symbol IDs: coarse kind and qualified name; a signature hash only for overloads | Accepted | 2026-09-19 |
 
 Module-level decisions live with their module, e.g., the [Module 1 MVP decisions](../modules/01-ingest-and-index/mvp-brief.md#decisions-confirmed-2026-09-19). Pending decisions (tech stack, demo repositories, module order) are tracked in the [roadmap](../roadmap.md#open-decisions).
 
