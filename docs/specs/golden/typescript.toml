@@ -1,0 +1,23 @@
+# Status: Proposed · Last updated: 2026-09-19
+# The TypeScript accuracy oracle. Shape: golden.schema.json, golden_sample.
+# Both edge lists are filled by task M3-05.
+
+version = 1
+language = "typescript"
+
+[fixture]
+path = "fixture/typescript"
+min_precision = 0.90
+min_recall = 0.90
+filled_by = "M3-05"
+edges = []
+absent = []
+
+[demo]
+repo = "nestjs/nest"
+commit = ""
+sample_seed = 20260919
+sample_size = 30
+min_precision = 0.90
+filled_by = "M3-05"
+edges = []

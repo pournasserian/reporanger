@@ -25,6 +25,7 @@ The M0 contracts, written before any engine code ([development workflow](develop
 - [Plugin interface](specs/plugin-interface.md) and its [message schema](specs/plugin-facts.json): syntax extractors, SCIP indexer descriptors, and manifest extractors; the rules for each language; and what the core builds from their facts.
 - [Sensitivity rules](specs/sensitivity-rules.md) and the [rule set](specs/sensitivity-rules.json): what counts as a secret, how it is redacted or withheld, and where redaction runs.
 - [Configuration](specs/config.md) and its [schema](specs/config.schema.json): the repository registry, per-repository settings, discovery defaults, and the effective configuration behind `config_hash`.
+- [Fixture and golden samples](specs/fixture/README.md): the in-repo fixture's design, the [golden schema](specs/golden/golden.schema.json), the per-language [samples](specs/golden/csharp.toml), and the [syntax conformance cases](specs/golden/syntax).
 
 ## Decisions
 

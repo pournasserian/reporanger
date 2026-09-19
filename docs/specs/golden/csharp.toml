@@ -1,0 +1,23 @@
+# Status: Proposed · Last updated: 2026-09-19
+# The C# accuracy oracle. Shape: golden.schema.json, golden_sample.
+# fixture.edges is filled by task M1-09, demo.edges by task M1-11.
+
+version = 1
+language = "csharp"
+
+[fixture]
+path = "fixture/csharp"
+min_precision = 0.90
+min_recall = 0.90
+filled_by = "M1-09"
+edges = []
+absent = []
+
+[demo]
+repo = "dotnet/orleans"
+commit = ""
+sample_seed = 20260919
+sample_size = 30
+min_precision = 0.90
+filled_by = "M1-11"
+edges = []

@@ -20,7 +20,7 @@ Claude Code stops when the work looks done, so every task needs a check it can r
 | Location | Holds | When |
 | --- | --- | --- |
 | `docs/` | Requirements, design, decisions, plan | Now |
-| `docs/specs/` | The contracts: `index-schema.sql`, `mcp-tools/<tool>.json` and `mcp-meta.json` (JSON Schema for requests and responses), `mcp-usage.md` (server instructions and usage prompt), `plugin-interface.md` and `plugin-facts.json` (JSON Schema for plugin messages and facts), `sensitivity-rules.md` and `sensitivity-rules.json` (rule model and default rules), `config.md` and `config.schema.json` (configuration and registry), `fixture/README.md`, `golden/<language>.toml` ([ADR 0017](decisions/0017-toml-for-configuration-and-golden-files.md)) | M0 |
+| `docs/specs/` | The contracts: `index-schema.sql`, `mcp-tools/<tool>.json` and `mcp-meta.json` (JSON Schema for requests and responses), `mcp-usage.md` (server instructions and usage prompt), `plugin-interface.md` and `plugin-facts.json` (JSON Schema for plugin messages and facts), `sensitivity-rules.md` and `sensitivity-rules.json` (rule model and default rules), `config.md` and `config.schema.json` (configuration and registry), `fixture/README.md` (fixture design), `golden/golden.schema.json`, `golden/<language>.toml` ([ADR 0017](decisions/0017-toml-for-configuration-and-golden-files.md)), and the syntax conformance cases under `golden/syntax/` | M0 |
 | `docs/specs/tasks/<milestone>-<nn>-<slug>.md` | One page per task, using the template below | From M0, for M1 onward |
 
 ### Task spec template
