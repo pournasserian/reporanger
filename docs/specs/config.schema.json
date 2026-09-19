@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "title": "RepoRanger configuration",
+  "description": "The shape of the two configuration files after they are parsed from TOML (ADR 0017): the repository file .reporanger.toml (repo_file) and the user's registry.toml (registry_file). It also defines effective_config, the object that meta.config_json stores and config_hash covers. config.md explains the layers, the defaults, and what shapes the index.",
+
+  "$defs": {
+    "globs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+
+    "settings_common": {
+      "type": "object",
+      "description": "Settings any layer may set.",
+      "properties": {
+        "discovery": {
+          "type": "object",
+          "properties": {
+            "include": { "$ref": "#/$defs/globs", "description": "Empty means every discovered file." },
+            "exclude": { "$ref": "#/$defs/globs", "description": "Added to the built-in exclusions." },
+            "max_file_bytes": { "type": "integer", "minimum": 1, "default": 1048576 },
+            "follow_symlinks": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "object",
+          "properties": {
+            "window": {
+              "description": "How far back history goes from the indexed commit.",
+              "oneOf": [
+                { "const": "full" },
+                { "type": "object", "properties": { "days": { "type": "integer", "minimum": 1 } }, "required": ["days"], "additionalProperties": false },
+                { "type": "object", "properties": { "commits": { "type": "integer", "minimum": 1 } }, "required": ["commits"], "additionalProperties": false }
+              ],
+              "default": "full"
+            },
+            "pseudonymize": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        "freshness": {
+          "type": "object",
+          "properties": {
+            "refresh_max_files": { "type": "integer", "minimum": 0, "default": 20 },
+            "refresh_max_seconds": { "type": "number", "exclusiveMinimum": 0, "default": 2 }
+          },
+          "additionalProperties": false
+        },
+        "tests": {
+          "type": "object",
+          "description": "Added to the syntax pass's built-in markers (plugin-interface.md, section 4.5).",
+          "properties": {
+            "attributes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "file_patterns": { "$ref": "#/$defs/globs" },
+            "base_classes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        },
+        "scip": {
+          "type": "object",
+          "properties": {
+            "prebuilt": {
+              "type": "object",
+              "description": "Project manifest path to a pre-built index.scip, both repository-relative.",
+              "additionalProperties": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "repo_file": {
+      "type": "object",
+      "description": "A repository's .reporanger.toml. It may not name executables or turn off sensitivity rules.",
+      "allOf": [{ "$ref": "#/$defs/settings_common" }],
+      "properties": {
+        "version": { "const": 1 },
+        "sensitivity": {
+          "description": "Additional sensitivity rules; disable is not allowed here.",
+          "allOf": [{ "$ref": "sensitivity-rules.json#/$defs/user_rules" }],
+          "not": { "required": ["disable"] }
+        }
+      },
+      "required": ["version"],
+      "unevaluatedProperties": false
+    },
+
+    "settings_user": {
+      "type": "object",
+      "description": "Settings in the user's own file, which may also turn rules off.",
+      "allOf": [{ "$ref": "#/$defs/settings_common" }],
+      "properties": {
+        "sensitivity": { "$ref": "sensitivity-rules.json#/$defs/user_rules" }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "repo_entry": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$", "description": "How tools name this repository." },
+        "source": { "type": "string", "minLength": 1, "description": "A local path, or a git URL without credentials." },
+        "ref": { "type": "string", "minLength": 1, "description": "Branch, tag, or commit. Without it: the checked-out HEAD of a local path, or the default branch of a URL." },
+        "index_path": { "type": "string", "minLength": 1, "description": "Where the index file lives, instead of the default under the RepoRanger home." },
+        "settings": { "$ref": "#/$defs/settings_user" }
+      },
+      "required": ["name", "source"],
+      "additionalProperties": false
+    },
+
+    "plugin": {
+      "type": "object",
+      "description": "An out-of-process extractor (plugin-interface.md, section 2).",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "command": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "cwd": { "type": "string", "minLength": 1 },
+        "env": { "type": "object", "additionalProperties": { "type": "string" } },
+        "timeout_seconds": { "type": "integer", "minimum": 1, "default": 60 }
+      },
+      "required": ["name", "command"],
+      "additionalProperties": false
+    },
+
+    "registry_file": {
+      "type": "object",
+      "description": "The user's registry.toml: which repositories exist, and every setting that names an executable.",
+      "properties": {
+        "version": { "const": 1 },
+        "default_repo": { "type": "string", "minLength": 1, "description": "Used when the working directory names no repository." },
+        "defaults": { "$ref": "#/$defs/settings_user" },
+        "repos": { "type": "array", "items": { "$ref": "#/$defs/repo_entry" } },
+        "pseudonymization": {
+          "type": "object",
+          "properties": {
+            "key_env": { "type": "string", "minLength": 1, "default": "REPORANGER_PSEUDONYM_KEY", "description": "The environment variable holding the HMAC key. The key is never written to a file." }
+          },
+          "additionalProperties": false
+        },
+        "plugins": { "type": "array", "items": { "$ref": "#/$defs/plugin" } },
+        "indexers": { "type": "array", "items": { "$ref": "plugin-facts.json#/$defs/indexer_descriptor" } }
+      },
+      "required": ["version"],
+      "additionalProperties": false
+    },
+
+    "effective_config": {
+      "type": "object",
+      "description": "What meta.config_json stores: the settings that shape the index, after the layers are merged. config_hash is SHA-256 of its RFC 8785 canonical JSON.",
+      "properties": {
+        "discovery": {
+          "type": "object",
+          "properties": {
+            "include": { "$ref": "#/$defs/globs" },
+            "exclude": { "$ref": "#/$defs/globs" },
+            "max_file_bytes": { "type": "integer", "minimum": 1 },
+            "follow_symlinks": { "type": "boolean" }
+          },
+          "required": ["include", "exclude", "max_file_bytes", "follow_symlinks"],
+          "additionalProperties": false
+        },
+        "history": {
+          "type": "object",
+          "properties": {
+            "window": { "oneOf": [{ "const": "full" }, { "type": "object" }] },
+            "pseudonymize": { "type": "boolean" },
+            "pseudonym_key_set": { "type": "boolean", "description": "Whether a key was supplied; never the key itself." }
+          },
+          "required": ["window", "pseudonymize", "pseudonym_key_set"],
+          "additionalProperties": false
+        },
+        "tests": { "type": "object" },
+        "sensitivity": {
+          "type": "object",
+          "properties": {
+            "rules_version": { "type": "integer", "minimum": 1 },
+            "disable": { "type": "array", "items": { "type": "string" } },
+            "file_rules": { "type": "array" },
+            "pattern_rules": { "type": "array" },
+            "allowlist": { "type": "object" }
+          },
+          "required": ["rules_version", "disable", "file_rules", "pattern_rules", "allowlist"],
+          "additionalProperties": false
+        },
+        "scip": { "type": "object", "properties": { "prebuilt": { "type": "object" } }, "required": ["prebuilt"], "additionalProperties": false }
+      },
+      "required": ["discovery", "history", "tests", "sensitivity", "scip"],
+      "additionalProperties": false
+    }
+  }
+}

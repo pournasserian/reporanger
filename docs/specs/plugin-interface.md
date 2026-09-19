@@ -153,7 +153,7 @@ C# only. The identity is exactly the string that [index-schema.sql](index-schema
 | TypeScript / JavaScript | Files named `*.test.*` or `*.spec.*`, or under a `__tests__/` directory. Test cases are anonymous callbacks, so tests are file-level | None from syntax; `package.json` entries come from the manifest extractor |
 | Python | Files named `test_*.py` or `*_test.py`, with the `test_*` functions and `Test*` classes in them; subclasses of `unittest.TestCase` anywhere, with their `test_*` methods | A module-level `if __name__ == "__main__":` → the file is `main` |
 
-These lists are defaults. Configuration can add test attributes, test file patterns, and test base classes, for example for an in-house framework.
+These lists are defaults. [Configuration](config.md) can add test attributes, test file patterns, and test base classes, for example for an in-house framework.
 
 ### 4.6 Merging
 
@@ -239,7 +239,7 @@ The three concrete descriptors, for scip-dotnet, scip-typescript, and scip-pytho
 
 ### 7.2 Running indexers
 
-The core runs each descriptor once per project it detects, in the project's directory. Configuration may instead point a project to a pre-built `index.scip`.
+The core runs each descriptor once per project it detects, in the project's directory. Descriptors live in the user's registry file, never in a repository's own configuration, because they name executables ([configuration](config.md), section 3). That configuration may instead point a project to a pre-built `index.scip`.
 - **Missing tool:** a project whose indexer's tools are missing gets `indexer_missing`.
 - **Failed run:** a run that exits with an error, times out, or writes no index gets `indexer_failed`.
 

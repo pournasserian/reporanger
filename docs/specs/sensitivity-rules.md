@@ -111,12 +111,12 @@ For example, `Password=Pa55-word-123;` becomes `Password=[REDACTED:connection-st
 
 ## 8. Configuration
 
-A repository's configuration (M0 item 4b) may hold a `user_rules` object, as `$defs/user_rules` in [sensitivity-rules.json](sensitivity-rules.json) defines:
+A repository's [configuration](config.md) may hold a `user_rules` object, as `$defs/user_rules` in [sensitivity-rules.json](sensitivity-rules.json) defines:
 - more file rules and pattern rules
 - more allowlist values and paths
 - `disable`: ids of default rules to turn off
 
-A default rule can be turned off only by naming its id. The health report lists every disabled rule (section 9).
+A default rule can be turned off only by naming its id, and only in the user's own registry file, never in a repository's `.reporanger.toml` ([configuration](config.md), section 3). The health report lists every disabled rule (section 9).
 
 ## 9. Reporting
 

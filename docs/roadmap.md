@@ -21,8 +21,8 @@ RepoRanger is in the design phase: documentation first, no code yet. The next st
   - [x] MCP tools: [`mcp-meta.json`](specs/mcp-meta.json), the 14 tools in [`mcp-tools/`](specs/mcp-tools/), and [`mcp-usage.md`](specs/mcp-usage.md). `get_impact` defaults to depth 3 (maximum 6) with a p95 target of 300 ms, and the refresh bound is 20 files and 2 seconds
   - [x] Plugin interface: [`plugin-interface.md`](specs/plugin-interface.md) and [`plugin-facts.json`](specs/plugin-facts.json), including the syntax pass contract, with [ADR 0015](decisions/0015-any-parser-that-passes-the-fixtures.md) (any parser that passes the fixtures) and [ADR 0016](decisions/0016-storage-capabilities-with-the-server-profile.md) (storage capability interfaces move to the Server profile)
   - [x] Sensitivity rules: [`sensitivity-rules.md`](specs/sensitivity-rules.md) and [`sensitivity-rules.json`](specs/sensitivity-rules.json). They define the rule model, the defaults (8 file rules and 26 pattern rules), the `[REDACTED:<rule id>]` marker, and redaction at write time and on every response
-  - [ ] Configuration (added 2026-09-19): `config.md` and its JSON Schema, covering the repository registry and per-repository settings
-  - [ ] Fixture and golden-sample format: `fixture/README.md`, `golden/<language>.yaml`
+  - [x] Configuration (added 2026-09-19): [`config.md`](specs/config.md) and [`config.schema.json`](specs/config.schema.json): the registry, per-repository settings, layering, discovery defaults, and the effective configuration behind `config_hash`, in TOML ([ADR 0017](decisions/0017-toml-for-configuration-and-golden-files.md))
+  - [ ] Fixture and golden-sample format: `fixture/README.md`, `golden/<language>.toml`
   - [ ] M1 task specs: `tasks/M1-<nn>-<slug>.md`
 - [ ] Reserve `reporanger` on npm, PyPI, and NuGet (all three were free on 2026-09-19)
 - [ ] Set the GitHub About text and topics (text decided; see below)

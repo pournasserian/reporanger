@@ -24,6 +24,7 @@ The M0 contracts, written before any engine code ([development workflow](develop
 - [MCP tools](specs/mcp-tools/) and [shared MCP definitions](specs/mcp-meta.json): request and response schemas for the 14 tools, plus `_meta`, paging, errors, resources, and limits. The [usage guidance](specs/mcp-usage.md) holds the server instructions and the usage prompt.
 - [Plugin interface](specs/plugin-interface.md) and its [message schema](specs/plugin-facts.json): syntax extractors, SCIP indexer descriptors, and manifest extractors; the rules for each language; and what the core builds from their facts.
 - [Sensitivity rules](specs/sensitivity-rules.md) and the [rule set](specs/sensitivity-rules.json): what counts as a secret, how it is redacted or withheld, and where redaction runs.
+- [Configuration](specs/config.md) and its [schema](specs/config.schema.json): the repository registry, per-repository settings, discovery defaults, and the effective configuration behind `config_hash`.
 
 ## Decisions
 
