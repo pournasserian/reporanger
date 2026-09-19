@@ -1,0 +1,65 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_tests_for",
+  "title": "Tests for code",
+  "description": "Tests mapped to symbols or files. Direct mappings (depth 0) come from test-to-code mapping, with the evidence behind each one (a call from the test, an import, or a naming convention) and its resolution level. via_callers adds tests that reach the target through callers, up to that many hops, marked by their depth. Order: target as passed, then depth, then strongest resolution, then id.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "targets": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": { "type": "string", "minLength": 1 },
+        "description": "Symbol or file IDs, or path:line locators."
+      },
+      "via_callers": { "type": "integer", "minimum": 0, "maximum": 3, "default": 0, "description": "Also find tests that reach the target through up to this many callers." },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "required": ["targets"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "string" },
+            "test": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "depth": { "type": "integer", "minimum": 0, "maximum": 3, "description": "0 for a direct mapping; otherwise the callers between the test and the target." },
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "enum": ["call", "import", "naming"] },
+              "description": "Direct mappings only."
+            },
+            "resolution": { "$ref": "../mcp-meta.json#/$defs/resolution" },
+            "pending": { "const": true, "description": "Present when an edge behind the mapping awaits SCIP re-resolution." }
+          },
+          "required": ["target", "test", "depth", "resolution"],
+          "additionalProperties": false
+        }
+      },
+      "errors": { "$ref": "../mcp-meta.json#/$defs/target_errors" },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

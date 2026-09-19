@@ -18,7 +18,7 @@ RepoRanger is in the design phase: documentation first, no code yet. The next st
 - [x] Development workflow decided: spec-driven per milestone, contract-first per interface, test-driven per task, adversarial review; plain in-repo specs ([development workflow](development-workflow.md)); a docs-phase `CLAUDE.md` is in place
 - [ ] M0 contracts under `docs/specs/` ([development workflow](development-workflow.md#specs-in-the-repository)):
   - [x] Index schema: [`index-schema.sql`](specs/index-schema.sql), with [ADR 0012](decisions/0012-resolution-levels-for-every-edge.md) (resolution levels), [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md) (syntax pass), and [ADR 0014](decisions/0014-symbol-id-scheme.md) (symbol IDs)
-  - [ ] MCP tools: `mcp-tools/<tool>.json` and `mcp-meta.json`, with the `get_impact` depth cap and p95 target and the refresh bound
+  - [x] MCP tools: [`mcp-meta.json`](specs/mcp-meta.json), the 14 tools in [`mcp-tools/`](specs/mcp-tools/), and [`mcp-usage.md`](specs/mcp-usage.md). `get_impact` defaults to depth 3 (maximum 6) with a p95 target of 300 ms, and the refresh bound is 20 files and 2 seconds
   - [ ] Plugin interface: `plugin-interface.md`, including the syntax pass contract
   - [ ] Sensitivity rules: `sensitivity-rules.md`
   - [ ] Fixture and golden-sample format: `fixture/README.md`, `golden/<language>.yaml`

@@ -1,0 +1,57 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_neighbors",
+  "title": "Direct neighbors",
+  "description": "One hop from each target: what calls, references, imports, inherits, or implements it (direction in), and what it calls, references, imports, inherits, or implements (direction out). Each edge gives its resolution level (resolved, import-scoped, or name-match), the file and lines where it occurs, and pending when that file awaits SCIP re-resolution. For more than one hop, use get_impact. Order: target as passed, then in before out, then edge type, then heaviest first, then id.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "targets": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": { "type": "string", "minLength": 1 },
+        "description": "Node IDs or path:line locators."
+      },
+      "direction": { "type": "string", "enum": ["in", "out", "both"], "default": "both" },
+      "edge_types": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": { "enum": ["CONTAINS", "IMPORTS", "CALLS", "REFERENCES", "INHERITS", "IMPLEMENTS", "TESTS", "DEPENDS_ON", "CO_CHANGES"] },
+        "default": ["CALLS", "REFERENCES", "INHERITS", "IMPLEMENTS", "IMPORTS"]
+      },
+      "min_resolution": {
+        "type": "string",
+        "enum": ["resolved", "import-scoped", "name-match"],
+        "default": "name-match",
+        "description": "The weakest resolution level to include: resolved keeps compiler-resolved edges only; name-match keeps everything."
+      },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 },
+      "cursor": { "type": "string", "minLength": 1, "description": "next_cursor from the previous page; keep the other arguments the same." }
+    },
+    "required": ["targets"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": { "type": "array", "items": { "$ref": "../mcp-meta.json#/$defs/edge" } },
+      "errors": { "$ref": "../mcp-meta.json#/$defs/target_errors" },
+      "next_cursor": { "$ref": "../mcp-meta.json#/$defs/next_cursor" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}

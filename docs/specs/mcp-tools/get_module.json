@@ -1,0 +1,109 @@
+{
+  "$comment": "Status: Proposed · Last updated: 2026-09-19",
+  "name": "get_module",
+  "title": "Module or file overview",
+  "description": "Describe communities or files. For a community: its member files, entry points, the communities it depends on and that depend on it, its hotspot files, and the communities it changes together with. For a file: its outline (symbols in line order, with their enclosing symbol), the files it depends on and that depend on it, its most complex symbols, and the files it changes together with. Each section is capped by limit and has a total where members are counted.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Registered repository name. Optional: defaults to the repository that contains the server's working directory, or the only registered one."
+      },
+      "targets": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": { "type": "string", "minLength": 1 },
+        "description": "Community IDs, file IDs, or path:line locators (which resolve to the file here)."
+      },
+      "include": {
+        "type": "array",
+        "items": { "enum": ["members", "entry_points", "dependencies", "hotspots", "coupling"] },
+        "uniqueItems": true,
+        "default": ["members", "entry_points", "dependencies", "hotspots", "coupling"],
+        "description": "Sections to return."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20,
+        "description": "Most items per section."
+      }
+    },
+    "required": ["targets"],
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "target": { "type": "string" },
+            "module": { "$ref": "../mcp-meta.json#/$defs/node" },
+            "members": {
+              "type": "array",
+              "description": "A community's files by path, or a file's symbols by line.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "node": { "$ref": "../mcp-meta.json#/$defs/node" },
+                  "parent": { "type": "string", "description": "ID of the enclosing symbol, in a file's outline." }
+                },
+                "required": ["node"],
+                "additionalProperties": false
+              }
+            },
+            "members_total": { "type": "integer", "minimum": 0 },
+            "entry_points": { "type": "array", "items": { "$ref": "../mcp-meta.json#/$defs/entry_point" } },
+            "depends_on": { "type": "array", "description": "Heaviest first.", "items": { "$ref": "../mcp-meta.json#/$defs/weighted_node" } },
+            "depended_on_by": { "type": "array", "description": "Heaviest first.", "items": { "$ref": "../mcp-meta.json#/$defs/weighted_node" } },
+            "hotspots": {
+              "type": "array",
+              "description": "A community's files by hotspot score, or a file's symbols by cyclomatic complexity.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "node": { "$ref": "../mcp-meta.json#/$defs/node" },
+                  "score": { "type": "number", "minimum": 0 }
+                },
+                "required": ["node", "score"],
+                "additionalProperties": false
+              }
+            },
+            "coupling": {
+              "type": "array",
+              "description": "Strongest coupling degree first.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "node": { "$ref": "../mcp-meta.json#/$defs/node" },
+                  "degree": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+                  "shared": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["node", "degree", "shared"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["target", "module"],
+          "additionalProperties": false
+        }
+      },
+      "errors": { "$ref": "../mcp-meta.json#/$defs/target_errors" },
+      "truncated": { "$ref": "../mcp-meta.json#/$defs/truncated" },
+      "_meta": { "$ref": "../mcp-meta.json#/$defs/meta" }
+    },
+    "required": ["items", "_meta"],
+    "additionalProperties": false
+  },
+  "annotations": {
+    "readOnlyHint": true,
+    "openWorldHint": false
+  }
+}
