@@ -16,6 +16,13 @@ RepoRanger is in the design phase: documentation first, no code yet. The next st
 - [x] Pick the demo repositories: dotnet/orleans, nestjs/nest, fastapi/fastapi, and microsoft/agent-framework for the scale test ([MVP brief](modules/01-ingest-and-index/mvp-brief.md#scope))
 - [x] Review the MVP against the current open-source field; option B (thin fact base) chosen and 23 review items decided ([MVP brief](modules/01-ingest-and-index/mvp-brief.md#review-decisions-2026-09-19), [research](research/oss-landscape-2026-09.md))
 - [x] Development workflow decided: spec-driven per milestone, contract-first per interface, test-driven per task, adversarial review; plain in-repo specs ([development workflow](development-workflow.md)); a docs-phase `CLAUDE.md` is in place
+- [ ] M0 contracts under `docs/specs/` ([development workflow](development-workflow.md#specs-in-the-repository)):
+  - [x] Index schema: [`index-schema.sql`](specs/index-schema.sql), with [ADR 0012](decisions/0012-resolution-levels-for-every-edge.md) (resolution levels), [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md) (syntax pass), and [ADR 0014](decisions/0014-symbol-id-scheme.md) (symbol IDs)
+  - [ ] MCP tools: `mcp-tools/<tool>.json` and `mcp-meta.json`, with the `get_impact` depth cap and p95 target and the refresh bound
+  - [ ] Plugin interface: `plugin-interface.md`, including the syntax pass contract
+  - [ ] Sensitivity rules: `sensitivity-rules.md`
+  - [ ] Fixture and golden-sample format: `fixture/README.md`, `golden/<language>.yaml`
+  - [ ] M1 task specs: `tasks/M1-<nn>-<slug>.md`
 - [ ] Reserve `reporanger` on npm, PyPI, and NuGet (all three were free on 2026-09-19)
 - [ ] Set the GitHub About text and topics (text decided; see below)
 
@@ -32,9 +39,9 @@ About 7–9 weeks, part-time. Each milestone ends in something demoable. The sav
 | Milestone | Scope | Estimate |
 | --- | --- | --- |
 | M0 — Contracts | Index schema (SQLite DDL) with resolution levels, symbol IDs, and `schema_version`; the 14 MCP tool shapes, `_meta`, resources, and the usage prompt; importer and extractor plugin interface; sensitivity rules format; fixture repo and golden-sample format; the `get_impact` depth cap and latency target; the refresh bound. Written as files under `docs/specs/` before any engine code, plus the M1 task specs ([development workflow](development-workflow.md)) | 1 week |
-| M1 — SCIP spike | Discovery; the SCIP importer for C# (scip-dotnet); the SQLite writer; `repo_map`, `find_symbols`, and `get_symbol` over the CLI. Indexes dotnet/orleans; measures precision on the C# golden sample and index size and time. This is where reality can change the plan | 1–2 weeks |
+| M1 — SCIP spike | Discovery; the syntax pass and the SCIP importer for C# (scip-dotnet); the SQLite writer; `repo_map`, `find_symbols`, and `get_symbol` over the CLI. Indexes dotnet/orleans; measures precision on the C# golden sample and index size and time. This is where reality can change the plan | 1–2 weeks |
 | M2 — Graph & search | Edge model with resolution levels; `get_neighbors`, `get_impact` with a depth cap, `get_module`, `get_dependencies`; full-text index; community detection; importance ranking; complexity metrics; the golden-sample CI job; the deep-traversal check | 2 weeks |
-| M3 — Languages & history | scip-typescript and scip-python importers; the tree-sitter fallback; file-level history, decayed churn, coupling, bug-fix detection, and the hotspot score; test-to-code mapping; dependency manifests; `get_history`, `get_hotspots`, `get_tests_for`. Measures full-history indexing time on agent-framework | 2 weeks |
+| M3 — Languages & history | scip-typescript and scip-python importers with their syntax passes; the tree-sitter fallback; file-level history, decayed churn, coupling, bug-fix detection, and the hotspot score; test-to-code mapping; dependency manifests; `get_history`, `get_hotspots`, `get_tests_for`. Measures full-history indexing time on agent-framework | 2 weeks |
 | M4 — MCP & freshness | All tools over stdio; resources and the usage prompt; the staleness check and `_meta`; content-hash incremental indexing with per-batch commits; health report; sensitivity policy on tool output; `get_index_info`; `pack_context`; the reproducible index hash | 1–2 weeks |
 | M5 — Release | Fixture and the four demo repos indexed and published; a README walkthrough with a coding agent using the MCP server; the benchmark page against codebase-memory-mcp and CodeGraphContext; the acceptance checklist | 1 week |
 
@@ -52,7 +59,7 @@ Summaries, model roles, and the cost log return as the first P1 milestone.
 
 - **Decided (2026-09-19):** C#/.NET builds the Module 1 reference implementation ([ADR 0010](decisions/0010-dotnet-reference-implementation.md)). Every contract stays stack-neutral, so TypeScript or Python implementations can follow.
 - **Constraint:** Microsoft Agent Framework supports .NET and Python, not TypeScript ([Agent Framework FAQ](https://learn.microsoft.com/agent-framework/support/faq#general), checked 2026-09-19). Module 1 needs no agent framework; the choice matters from the first lens module on.
-- **Risks to validate in M1:** the SCIP indexers on the demo repos (how much of each repo resolves), and reading SCIP protobuf from .NET. The tree-sitter binding risk is reduced to the fallback.
+- **Risks to validate in M1:** the SCIP indexers on the demo repos (how much of each repo resolves), reading SCIP protobuf from .NET, and the syntax pass for C#. Since [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md), every code file is parsed, so the parser binding risk is back on the primary path.
 - **Still a preference, not a decision:** a React and shadcn/ui frontend, settled with the Platform module.
 
 ## GitHub presentation (decided 2026-09-19)

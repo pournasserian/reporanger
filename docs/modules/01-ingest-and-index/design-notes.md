@@ -39,6 +39,9 @@ Every stage writes into the index. Structure runs over the stored graph and writ
 
 ## Conceptual graph model
 
+> [!NOTE]
+> The [index schema](../../specs/index-schema.sql) supersedes this sketch. Commits and tests aren't separate node kinds there, TOUCHED_BY is dropped, and symbol IDs follow [ADR 0014](../../decisions/0014-symbol-id-scheme.md).
+
 **Node kinds**
 
 | Kind | Represents |
@@ -67,6 +70,9 @@ Every node carries a content hash, the last commit it was seen in, and provenanc
 **Symbol IDs** are stable across re-indexing: `path::kind::name#signature-hash`, for example `src/Auth/Login.cs::Method::Login#a1b2c3`. SCIP symbol strings are stored alongside for round-tripping. An ID changes when a symbol moves, is renamed, or changes its signature, and stays the same for unrelated edits.
 
 ## Embedded storage layout (SQLite)
+
+> [!NOTE]
+> Superseded by the [index schema](../../specs/index-schema.sql).
 
 | Table | Holds |
 | --- | --- |
@@ -162,12 +168,12 @@ The reference implementation is C#/.NET ([ADR 0010](../../decisions/0010-dotnet-
 - **Summaries:** P1, with `extract` for symbol and file summaries and `synthesize` for module and repo summaries.
 - **Hotspots:** decayed churn × complexity, shipped in M3 with the history signals; the coverage factor returns in P1.
 - **Freshness:** staleness check with bounded refresh on every MCP call, and `_meta` on every response.
+- **Symbol IDs:** a syntax pass runs on every code file, and IDs are computed from it in both modes, so fallback and SCIP IDs match once a project starts building. See the [index schema](../../specs/index-schema.sql), [ADR 0013](../../decisions/0013-syntax-pass-on-every-code-file.md), and [ADR 0014](../../decisions/0014-symbol-id-scheme.md).
 
 ## Still open for M0
 
 - The default and maximum depth cap for `get_impact`, and its p95 latency target.
 - The refresh bound for the staleness check (files and time budget).
-- The mapping from SCIP symbols to RepoRanger symbol IDs, and how fallback symbols get IDs that match once a project starts building.
 - Leiden versus Louvain for the reference implementation, given library availability in .NET.
 - The exact SCIP indexer invocation per project type (solution versus project for scip-dotnet; monorepo packages for scip-typescript; virtual environments for scip-python).
 - **History cost:** with full history as the default, how long does file-level history take on agent-framework? M3 measures it, and the default is revisited if it is too slow.
