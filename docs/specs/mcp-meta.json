@@ -339,6 +339,6 @@
     "resolution": { "enum": ["resolved", "import-scoped", "name-match"] },
     "extraction": { "enum": ["scip", "fallback", "syntax", "text", "skipped"] },
     "skip_reason": { "enum": ["generated", "vendored", "minified", "binary", "too_large", "excluded", "encoding"] },
-    "diagnostic_code": { "enum": ["parse_error", "indexer_failed", "indexer_missing", "document_missing", "unresolved_references", "analyzer_degraded"] }
+    "diagnostic_code": { "enum": ["parse_error", "indexer_failed", "indexer_missing", "document_missing", "unresolved_references", "unmatched_definitions", "analyzer_degraded"] }
   }
 }

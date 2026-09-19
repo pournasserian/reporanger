@@ -19,7 +19,7 @@ RepoRanger is in the design phase: documentation first, no code yet. The next st
 - [ ] M0 contracts under `docs/specs/` ([development workflow](development-workflow.md#specs-in-the-repository)):
   - [x] Index schema: [`index-schema.sql`](specs/index-schema.sql), with [ADR 0012](decisions/0012-resolution-levels-for-every-edge.md) (resolution levels), [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md) (syntax pass), and [ADR 0014](decisions/0014-symbol-id-scheme.md) (symbol IDs)
   - [x] MCP tools: [`mcp-meta.json`](specs/mcp-meta.json), the 14 tools in [`mcp-tools/`](specs/mcp-tools/), and [`mcp-usage.md`](specs/mcp-usage.md). `get_impact` defaults to depth 3 (maximum 6) with a p95 target of 300 ms, and the refresh bound is 20 files and 2 seconds
-  - [ ] Plugin interface: `plugin-interface.md`, including the syntax pass contract
+  - [x] Plugin interface: [`plugin-interface.md`](specs/plugin-interface.md) and [`plugin-facts.json`](specs/plugin-facts.json), including the syntax pass contract, with [ADR 0015](decisions/0015-any-parser-that-passes-the-fixtures.md) (any parser that passes the fixtures) and [ADR 0016](decisions/0016-storage-capabilities-with-the-server-profile.md) (storage capability interfaces move to the Server profile)
   - [ ] Sensitivity rules: `sensitivity-rules.md`
   - [ ] Fixture and golden-sample format: `fixture/README.md`, `golden/<language>.yaml`
   - [ ] M1 task specs: `tasks/M1-<nn>-<slug>.md`
@@ -59,7 +59,7 @@ Summaries, model roles, and the cost log return as the first P1 milestone.
 
 - **Decided (2026-09-19):** C#/.NET builds the Module 1 reference implementation ([ADR 0010](decisions/0010-dotnet-reference-implementation.md)). Every contract stays stack-neutral, so TypeScript or Python implementations can follow.
 - **Constraint:** Microsoft Agent Framework supports .NET and Python, not TypeScript ([Agent Framework FAQ](https://learn.microsoft.com/agent-framework/support/faq#general), checked 2026-09-19). Module 1 needs no agent framework; the choice matters from the first lens module on.
-- **Risks to validate in M1:** the SCIP indexers on the demo repos (how much of each repo resolves), reading SCIP protobuf from .NET, and the syntax pass for C#. Since [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md), every code file is parsed, so the parser binding risk is back on the primary path.
+- **Risks to validate in M1:** the SCIP indexers on the demo repos (how much of each repo resolves), reading SCIP protobuf from .NET, and the syntax pass for C#. Since [ADR 0013](decisions/0013-syntax-pass-on-every-code-file.md), every code file is parsed, so the parser binding risk is back on the primary path. [ADR 0015](decisions/0015-any-parser-that-passes-the-fixtures.md) lets C# use Roslyn's syntax trees instead of tree-sitter, and lets TypeScript and Python use an out-of-process extractor.
 - **Still a preference, not a decision:** a React and shadcn/ui frontend, settled with the Platform module.
 
 ## GitHub presentation (decided 2026-09-19)

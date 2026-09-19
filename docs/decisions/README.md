@@ -20,6 +20,8 @@ Each record captures one significant decision: its context, the decision, and it
 | [0012](0012-resolution-levels-for-every-edge.md) | Every edge carries a resolution level; structural edges are `resolved` | Accepted | 2026-09-19 |
 | [0013](0013-syntax-pass-on-every-code-file.md) | A syntax pass runs on every code file; SCIP adds resolution | Accepted | 2026-09-19 |
 | [0014](0014-symbol-id-scheme.md) | Symbol IDs: coarse kind and qualified name; a signature hash only for overloads | Accepted | 2026-09-19 |
+| [0015](0015-any-parser-that-passes-the-fixtures.md) | Any parser that passes the golden fixtures may implement a language's syntax pass | Accepted | 2026-09-19 |
+| [0016](0016-storage-capabilities-with-the-server-profile.md) | Storage capability interfaces are specified with the Server profile, not in M0 | Accepted | 2026-09-19 |
 
 Module-level decisions live with their module, e.g., the [Module 1 MVP decisions](../modules/01-ingest-and-index/mvp-brief.md#decisions-confirmed-2026-09-19). Pending decisions (tech stack, demo repositories, module order) are tracked in the [roadmap](../roadmap.md#open-decisions).
 

@@ -7,6 +7,9 @@
 
 ## Pipeline
 
+> [!NOTE]
+> The [plugin interface](../../specs/plugin-interface.md) supersedes this sketch for extraction. A syntax pass runs on every code file ([ADR 0013](../../decisions/0013-syntax-pass-on-every-code-file.md)), SCIP adds resolution, and syntax extractors, SCIP indexers, and manifest extractors follow the plugin interface.
+
 ```mermaid
 flowchart LR
   src["Source"] --> disc["Discover"]
@@ -159,7 +162,7 @@ The reference implementation is C#/.NET ([ADR 0010](../../decisions/0010-dotnet-
 | Area | Candidates |
 | --- | --- |
 | Precise extraction | scip-dotnet, scip-typescript, scip-python (Apache-2.0); the SCIP protobuf schema is read with the platform's protobuf library |
-| Fallback parsing | tree-sitter (official bindings for Node.js and Python; community bindings for .NET), symbols and imports only |
+| Fallback parsing | tree-sitter (official bindings for Node.js and Python; community bindings for .NET), symbols and imports only. Since [ADR 0015](../../decisions/0015-any-parser-that-passes-the-fixtures.md), any parser that passes the golden fixtures may serve a language, such as Roslyn's syntax trees for C# |
 | Storage | SQLite with FTS5; sqlite-vec for vectors (P2); PostgreSQL with pgvector for the Server profile |
 | Graph algorithms | Leiden or Louvain community detection; PageRank; implemented in-process for the reference stack |
 | Secret detection | Secretlint or gitleaks rule sets, as data |
@@ -177,9 +180,9 @@ The reference implementation is C#/.NET ([ADR 0010](../../decisions/0010-dotnet-
 - **Symbol IDs:** a syntax pass runs on every code file, and IDs are computed from it in both modes, so fallback and SCIP IDs match once a project starts building. See the [index schema](../../specs/index-schema.sql), [ADR 0013](../../decisions/0013-syntax-pass-on-every-code-file.md), and [ADR 0014](../../decisions/0014-symbol-id-scheme.md).
 - **Impact depth and latency:** `get_impact` defaults to depth 3, with a maximum of 6. It returns ranked, capped results, with a p95 target of 300 ms on agent-framework ([mcp-meta.json](../../specs/mcp-meta.json)).
 - **Refresh bound:** up to 20 changed files are refreshed within 2 seconds, at the syntax level, with SCIP re-resolution pending until the next index run ([mcp-meta.json](../../specs/mcp-meta.json)).
+- **SCIP indexer invocation:** the [plugin interface](../../specs/plugin-interface.md#71-indexer-descriptors) defines the descriptor format. The concrete descriptors for scip-dotnet, scip-typescript, and scip-python go into the M1 and M3 task specs, after those milestones run them on the demo repositories.
 
 ## Still open for M0
 
 - Leiden versus Louvain for the reference implementation, given library availability in .NET.
-- The exact SCIP indexer invocation per project type (solution versus project for scip-dotnet; monorepo packages for scip-typescript; virtual environments for scip-python).
 - **History cost:** with full history as the default, how long does file-level history take on agent-framework? M3 measures it, and the default is revisited if it is too slow.
